@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WeFi-harness · 让 AI 按同一套流程改代码</title>
+<meta name="description" content="WeFi-harness 让 Claude Code、Codex 和 Cursor 按同一套步骤改代码：先理解需求，按风险选择流程，改完用门禁和浏览器验证，最后提交、开 PR、回写 issue。">
+<meta property="og:title" content="WeFi-harness · 让 AI 按同一套流程改代码">
+<meta property="og:description" content="团队共用的 AI 开发流程：10 个 Skill、两档轨道、门禁与浏览器验证。">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230f7a63%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22bold%22 fill=%22white%22>W</text></svg>">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f8fa;
+  --bg-inset: #eef1f4;
+  --fg: #1a202c;
+  --fg-muted: #55606b;
+  --fg-faint: #8b949e;
+  --line: #d8dee4;
+  --accent: #0f7a63;
+  --accent-soft: #e7f4f0;
+  --accent-line: #9ad7c8;
+  --warn: #8a5a00;
+  --warn-soft: #fff8c5;
+  --code-bg: #f6f8fa;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --bg-soft: #151b22;
+    --bg-inset: #1c2129;
+    --fg: #e6edf3;
+    --fg-muted: #9198a1;
+    --fg-faint: #6e7681;
+    --line: #30363d;
+    --accent: #3fd0b0;
+    --accent-soft: #10241f;
+    --accent-line: #1f6b5c;
+    --warn: #d29922;
+    --warn-soft: #2b2200;
+    --code-bg: #151b22;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+.layout {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 52px;
+  align-items: start;
+  padding-top: 36px;
+}
+main { min-width: 0; padding-bottom: 24px; }
+
+/* 顶栏 */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { display: flex; align-items: center; gap: 18px; height: 56px; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+  color: var(--fg);
+  font-weight: 650;
+  font-size: 15px;
+  text-decoration: none;
+}
+.logo {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+.ver {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.topbar a.link {
+  color: var(--fg-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.topbar a.link:hover { color: var(--fg); }
+
+/* 侧栏 */
+.sidebar {
+  position: sticky;
+  top: 36px;
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
+  font-size: 13.5px;
+  padding-right: 6px;
+}
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.side-brand {
+  display: none;
+}
+.side-group { margin-bottom: 16px; }
+.side-label {
+  margin: 0 0 6px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.side-group a {
+  display: block;
+  padding: 4px 10px;
+  color: var(--fg-muted);
+  text-decoration: none;
+  line-height: 1.45;
+  border-left: 2px solid transparent;
+  border-radius: 0 6px 6px 0;
+}
+.side-group a:hover { color: var(--fg); background: var(--bg-soft); }
+.side-group a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+/* 排版 */
+section[id] {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 72px;
+}
+section[id]:last-of-type { border-bottom: none; }
+h1, h2, h3, h4 { line-height: 1.3; letter-spacing: -.02em; font-weight: 650; margin: 0; }
+h2 { font-size: 26px; margin-bottom: 8px; }
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.lede { color: var(--fg-muted); font-size: 16.5px; max-width: 62ch; margin: 0 0 26px; }
+h3 { font-size: 18px; margin: 36px 0 10px; display: flex; align-items: baseline; gap: 10px; }
+h3:first-child { margin-top: 0; }
+h3 .idx { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--fg-faint); }
+h4 { font-size: 15px; margin: 20px 0 6px; }
+p { margin: 0 0 15px; max-width: 74ch; }
+code {
+  font-family: var(--mono);
+  font-size: .875em;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+p code, li code, td code, th code { white-space: nowrap; }
+a { color: var(--accent); }
+ul, ol { margin: 0 0 16px; padding-left: 22px; max-width: 74ch; }
+li { margin-bottom: 6px; }
+
+/* Hero */
+.hero {
+  padding: 56px 0 46px;
+  border-bottom: 1px solid var(--line);
+  background: radial-gradient(58% 55% at 82% 0%, var(--accent-soft), transparent 70%), var(--bg);
+}
+.hero h1 {
+  font-size: clamp(29px, 4.2vw, 42px);
+  line-height: 1.2;
+  letter-spacing: -.028em;
+  max-width: 20ch;
+  margin-bottom: 18px;
+}
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .lede { font-size: 17.5px; margin-bottom: 26px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+.pill {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--fg-muted);
+}
+.pill.ok { border-color: var(--accent-line); color: var(--accent); background: var(--accent-soft); }
+.install {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 620px;
+  margin-bottom: 10px;
+}
+.install-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-muted);
+}
+.install-body {
+  padding: 13px 16px;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+.install-body .c { color: var(--fg-faint); }
+.install-body .k { color: var(--accent); font-weight: 600; }
+.install-hint { font-size: 13px; color: var(--fg-muted); margin: 0 0 30px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 17px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color .15s, transform .15s, filter .15s;
+}
+.btn:hover { border-color: var(--fg-faint); transform: translateY(-1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.07); }
+
+/* 卡片 */
+.grid { display: grid; gap: 14px; margin: 22px 0 6px; }
+.grid.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 18px 18px 15px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.card .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.card h4 { margin: 0 0 5px; font-size: 15px; }
+.card p { margin: 0; font-size: 14px; color: var(--fg-muted); max-width: none; }
+.card .foot {
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px dashed var(--line);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-faint);
+}
+
+/* 表格 */
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th {
+  background: var(--bg-soft);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--bg-soft); }
+td code { white-space: normal; word-break: break-word; }
+
+/* 时间轴 */
+.timeline { position: relative; margin: 24px 0 4px; padding-left: 26px; list-style: none; max-width: none; }
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 6px; top: 8px; bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(var(--line) 65%, transparent);
+}
+.timeline > li { position: relative; margin-bottom: 18px; padding-left: 4px; }
+.timeline > li::before {
+  content: "";
+  position: absolute;
+  left: -26px; top: 7px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--fg-faint);
+}
+.timeline > li.key::before { border-color: var(--accent); background: var(--accent); }
+.tl-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 2px; }
+.tl-title { font-weight: 650; font-size: 15px; }
+.tl-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--fg-faint);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+.tl-body { margin: 0; color: var(--fg-muted); font-size: 14px; max-width: 66ch; }
+
+/* 提示块 */
+.callout {
+  max-width: 76ch;
+  margin: 20px 0;
+  padding: 14px 18px;
+  border: 1px solid var(--accent-line);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  font-size: 14.5px;
+}
+.callout.warn { border-color: color-mix(in srgb, var(--warn) 32%, transparent); background: var(--warn-soft); }
+.callout p { margin-bottom: 6px; max-width: none; }
+.callout p:last-child { margin-bottom: 0; }
+.callout .title { font-weight: 650; margin-bottom: 3px; }
+
+/* 代码块 */
+pre {
+  margin: 18px 0;
+  padding: 15px 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--code-bg);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+pre .c { color: var(--fg-faint); }
+pre .k { color: var(--accent); }
+
+/* 架构图 */
+.arch {
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-soft);
+  overflow-x: auto;
+}
+.arch svg { display: block; }
+.arch-caption {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--fg-faint);
+  max-width: none;
+}
+
+/* 终端对话 */
+.term { border: 1px solid var(--line); border-radius: 10px; margin: 20px 0; overflow: hidden; }
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.term-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: block; }
+.term-bar span { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--fg-faint); }
+.term-body {
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 12.8px;
+  line-height: 1.85;
+  overflow-x: auto;
+}
+.term-body .ln { display: block; }
+.term-body .u { color: var(--fg); }
+.term-body .u::before { content: "你  "; color: var(--accent); font-weight: 700; }
+.term-body .a { color: var(--fg-muted); }
+.term-body .a::before { content: "AI  "; color: var(--fg-faint); font-weight: 700; }
+.term-body .d { color: var(--fg-faint); }
+.term-body .o { color: var(--fg-muted); }
+.term-body .dim { color: var(--fg-faint); }
+
+/* 术语 */
+.defs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 22px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--line);
+}
+.defs > div { background: var(--bg); padding: 14px 17px; }
+.defs dt { margin-bottom: 2px; font-family: var(--mono); font-size: 13px; font-weight: 650; color: var(--accent); }
+.defs dd { margin: 0; font-size: 13.5px; color: var(--fg-muted); }
+
+/* 版本 */
+.versions { list-style: none; margin: 22px 0; padding: 0; max-width: none; }
+.versions > li {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 18px;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.versions > li:last-child { border-bottom: none; }
+.vnum { font-family: var(--mono); font-size: 12.5px; font-weight: 650; color: var(--accent); padding-top: 2px; }
+.vbody { font-size: 14px; color: var(--fg-muted); }
+.vbody strong { color: var(--fg); }
+
+/* 页脚 */
+footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: var(--bg-soft); font-size: 13.5px; }
+.footer-inner { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; color: var(--fg-muted); }
+.footer-inner a { color: var(--fg-muted); text-decoration: none; margin-right: 16px; }
+.footer-inner a:hover { color: var(--fg); }
+
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; gap: 0; padding-top: 4px; }
+  .sidebar { display: none; }
+  .grid.c3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .defs { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 18px; }
+  .grid.c2, .grid.c3 { grid-template-columns: 1fr; }
+  h2 { font-size: 22px; }
+  .hero { padding: 40px 0 34px; }
+  .hero h1 { font-size: 27px; }
+  .hide-sm { display: none; }
+  .versions > li { grid-template-columns: 1fr; gap: 2px; }
+  section[id] { padding: 36px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#top"><span class="logo">W</span><span>WeFi-harness</span></a>
+    <span class="ver">v0.2.7</span>
+    <a class="link hide-sm" href="https://github.com/WeFi-Harness/WeFi-harness">GitHub</a>
+    <a class="link hide-sm" href="https://github.com/WeFi-Harness/WeFi-harness/blob/main/CHANGELOG.md">更新日志</a>
+    <a class="link" href="#install">快速开始</a>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+
+<nav class="sidebar" aria-label="页面导航">
+  <div class="side-group">
+    <p class="side-label">开始</p>
+    <a href="#top">概览</a>
+    <a href="#why">为什么需要</a>
+    <a href="#install">安装接入</a>
+  </div>
+  <div class="side-group">
+    <p class="side-label">工作方式</p>
+    <a href="#lifecycle">一次请求</a>
+    <a href="#concepts">核心概念</a>
+    <a href="#routing">路由表</a>
+    <a href="#skills">Skill 清单</a>
+  </div>
+  <div class="side-group">
+    <p class="side-label">技术拆解</p>
+    <a href="#architecture">架构</a>
+    <a href="#context">上下文装载</a>
+    <a href="#release">更新分发</a>
+    <a href="#tradeoffs">设计取舍</a>
+  </div>
+  <div class="side-group">
+    <p class="side-label">参考</p>
+    <a href="#cli">命令</a>
+    <a href="#matrix">支持矩阵</a>
+    <a href="#evals">评测</a>
+    <a href="#troubleshooting">故障排查</a>
+  </div>
+  <div class="side-group">
+    <p class="side-label">参与</p>
+    <a href="#contribute">贡献</a>
+    <a href="#roadmap">路线图</a>
+  </div>
+</nav>
+
+<main id="top">
+
+<section class="hero" id="overview">
+  <div class="badges">
+    <span class="pill ok">v0.2.7</span>
+    <span class="pill">Node ≥ 18</span>
+    <span class="pill">零运行时依赖</span>
+    <span class="pill">10 个 Skill</span>
+  </div>
+  <h1>让 AI 按同一套流程<br>改<em>代码</em></h1>
+  <p class="lede">
+    WeFi-harness 是 WeFi 团队的 AI 开发流程。它让 Claude Code、Codex 和 Cursor
+    按同一套步骤改代码：先理解需求，按风险选择流程，改完用门禁和浏览器验证，
+    最后提交、开 PR、回写 issue。
+  </p>
+  <div class="install">
+    <div class="install-head"><span>业务仓库根目录</span><span>bash</span></div>
+    <div class="install-body">
+      <span class="c"># 一个人做一次</span><br>
+      <span class="k">npx</span> github:WeFi-Harness/WeFi-harness onboard
+    </div>
+  </div>
+  <p class="install-hint">
+    本仓库是私有仓库，运行前必须能用 git 访问它。装完在工具里输入「接入 WeFi」。
+  </p>
+  <div class="actions">
+    <a class="btn primary" href="#install">接入自己的仓库</a>
+    <a class="btn" href="#lifecycle">看一次请求怎么跑</a>
+    <a class="btn" href="https://github.com/WeFi-Harness/WeFi-harness">查看源码</a>
+  </div>
+</section>
+
+<section id="why">
+  <p class="kicker">01 · 为什么需要</p>
+  <h2>AI 改代码的三个失败模式</h2>
+  <p class="lede">
+    直接把需求交给 AI，它并不缺写代码的能力，缺的是「这次该做到哪一步」的判断。
+    WeFi-harness 把这个判断写进流程，不靠 AI 每次临场发挥。
+  </p>
+
+  <div class="grid c3">
+    <div class="card">
+      <span class="tag">失败模式 A</span>
+      <h4>改到不该改的地方</h4>
+      <p>加一个按钮，顺手重构了半个模块。或者该写方案的大改动，直接上手改了。</p>
+      <div class="foot">对策：两档轨道 + 300 行审查阈值</div>
+    </div>
+    <div class="card">
+      <span class="tag">失败模式 B</span>
+      <h4>改完不验证就说好了</h4>
+      <p>「已完成」只是措辞。类型没过、测试没跑、页面根本没打开过。</p>
+      <div class="foot">对策：门禁 + 浏览器验证存证</div>
+    </div>
+    <div class="card">
+      <span class="tag">失败模式 C</span>
+      <h4>文档写完就烂尾</h4>
+      <p>方案写了一半，评审记录没留，接手的人不知道当初为什么这么定。</p>
+      <div class="foot">对策：变更目录 + 教训台账</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p class="title">不替代现有工具</p>
+    <p>
+      WeFi-harness 不做代码生成，也不做 CI。它是一层流程：决定 AI 该读什么、
+      做到哪一步停下、改完拿什么证明。门禁调用的仍是项目自己的 <code>npm run build</code>、
+      <code>tsc</code>、<code>eslint</code>。
+    </p>
+  </div>
+</section>
+
+<section id="install">
+  <p class="kicker">02 · 安装接入</p>
+  <h2>接入一个业务仓库</h2>
+  <p class="lede">
+    接入由一个人做一次。之后每个开发者 clone 仓库，在工具里打开就能用。
+    框架每天自动更新到最新发布版本。
+  </p>
+
+  <div class="grid c3">
+    <div class="card">
+      <span class="tag">路径 A</span>
+      <h4>新接入</h4>
+      <p>在业务仓库根目录运行 <code>onboard</code>，克隆框架、生成引导脚本和入口。</p>
+      <div class="foot">npx … onboard</div>
+    </div>
+    <div class="card">
+      <span class="tag">路径 B</span>
+      <h4>0.2 以前接入</h4>
+      <p>已经提交了 <code>.wefi/harness/</code> 副本、有 <code>wefi-sync.yml</code> 的仓库，运行一次 <code>migrate</code>。</p>
+      <div class="foot">npx … migrate</div>
+    </div>
+    <div class="card">
+      <span class="tag">路径 C</span>
+      <h4>模板仓库</h4>
+      <p>从团队模板仓库创建的新项目，模板中已经包含这些文件，不用再接入。</p>
+      <div class="foot">无需命令</div>
+    </div>
+  </div>
+
+  <h3><span class="idx">2.1</span>一个人做一次</h3>
+  <pre><span class="c"># 在业务仓库根目录</span>
+<span class="k">npx</span> github:WeFi-Harness/WeFi-harness onboard</pre>
+  <p>
+    它把框架仓库克隆到 <code>.wefi/harness/</code>，检出最新的发布版本，并加入 <code>.gitignore</code>。
+    同时生成引导脚本 <code>.wefi/bootstrap.mjs</code>、各工具的入口和项目知识库初稿。
+  </p>
+  <p>
+    然后在任一工具中打开仓库，输入「接入 WeFi」。AI 读代码补全项目规则、模块说明和验证手册，
+    并选择项目管理系统。最后审查改动、提交、开 PR。
+  </p>
+
+  <h3><span class="idx">2.2</span>每个开发者</h3>
+  <ul>
+    <li><strong>Claude Code</strong>：打开仓库时，Hook 自动克隆框架。</li>
+    <li><strong>Codex、Cursor</strong>：先运行一次 <code>node .wefi/bootstrap.mjs</code>。</li>
+  </ul>
+  <p>
+    之后每天第一次使用时，框架自动更新到最新的发布版本。AI 会在回复中告诉你更新到了哪个版本。
+    想马上更新，输入 <code>/wefi update</code>，Codex 中是 <code>$wefi update</code>。
+  </p>
+
+  <h3><span class="idx">2.3</span>按需安装</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>什么时候需要</th><th>装什么</th><th>方法</th></tr></thead>
+      <tbody>
+        <tr><td>前端项目，要做浏览器验证</td><td><code>Playwright MCP</code></td><td><code>references/tools.md</code> 的「浏览器」节</td></tr>
+        <tr><td><code>tracker.type</code> 是 <code>issuehub</code></td><td><code>IssueHub MCP</code></td><td><code>references/tracker.md</code> 的「安装」节</td></tr>
+        <tr><td><code>tracker.type</code> 是 <code>github</code></td><td><code>gh</code></td><td>安装后运行 <code>gh auth login</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    然后运行 <code>node .wefi/harness/wefi.mjs doctor</code>，确认工具已就绪。
+    确认 WeFi 生效：在工具中输入「讲讲 <code>src/</code> 是做什么的」。Claude Code 中看到它调用
+    <code>wefi-explain</code>；Codex 和 Cursor 中看到回复开头是 <code>[wefi] 模式=explain</code>。
+  </p>
+</section>
+
+<section id="lifecycle">
+  <p class="kicker">03 · 工作方式</p>
+  <h2>一次请求走完的步骤</h2>
+  <p class="lede">
+    以 issue PDB-901 为例：把文件模板页空列表的文案改成
+    <code>No file templates yet. Upload one to get started.</code>
+  </p>
+
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>你与 AI 的对话</span></div>
+    <div class="term-body">
+      <span class="ln u">做一下 PDB-901</span>
+      <span class="ln a">读 issue PDB-901，写快照 <span class="d">.wefi/state/issues/PDB-901.md</span>。</span>
+      <span class="ln a">轨道：quick。单页面文案改动，不触及接口。</span>
+      <span class="ln a">新建分支 <span class="d">feat/PDB-901-file-template-empty-text</span>。</span>
+      <span class="ln a">装载规则：<span class="d">ui-text.md</span>「空状态必须写明为什么空，并给出下一步操作」。</span>
+      <span class="ln a">修改 <span class="d">src/views/system/fileTemplate/index.vue:336</span>。</span>
+      <span class="ln a"><span class="d">wefi gate</span>：typecheck、lint 通过。</span>
+      <span class="ln a">浏览器验证：空列表显示新文案，控制台没有新增错误。截图已保存。</span>
+      <span class="ln a">已完成。待确认：页面没有 Upload 入口，新文案引导的操作在本页不可达。</span>
+      <span class="ln u">提个 PR</span>
+      <span class="ln a">提交 <span class="d">feat: guide users to upload when file template list is empty</span>，页脚 <span class="d">Refs: PDB-901</span>。</span>
+      <span class="ln a">PR #42 已创建。</span>
+      <span class="ln a">PDB-901 已评论 PR 链接和验证结论，状态从 New 改为 Pending Review。</span>
+    </div>
+  </div>
+
+  <ol class="timeline">
+    <li class="key">
+      <div class="tl-head"><span class="tl-title">理解请求</span><span class="tl-tag">wefi-feature</span></div>
+      <p class="tl-body">读 issue，写快照，确认要改什么、不碰什么。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">选轨道</span><span class="tl-tag">quick / plan / hotfix</span></div>
+      <p class="tl-body">单页文案改动，不触及接口，走 quick，直接改代码。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">装载规则</span><span class="tl-tag">wefi rules</span></div>
+      <p class="tl-body">按要改的文件挑出适用规则，只读这部分。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">改代码</span><span class="tl-tag">quick</span></div>
+      <p class="tl-body">一个文件，一行文案。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">门禁</span><span class="tl-tag">wefi gate</span></div>
+      <p class="tl-body">类型检查、Lint、相关测试。按改动自动选择检查范围。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">浏览器验证</span><span class="tl-tag">运行验证</span></div>
+      <p class="tl-body">打开受影响的页面，走一遍场景，截图存证。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">审查</span><span class="tl-tag">子 Agent</span></div>
+      <p class="tl-body">quick 轨道在 diff 超过 300 行或改到共享路径时才派。</p>
+    </li>
+    <li>
+      <div class="tl-head"><span class="tl-title">交付</span><span class="tl-tag">wefi-ship</span></div>
+      <p class="tl-body">提交、push、开 PR，回写 issue 状态。</p>
+    </li>
+  </ol>
+
+  <div class="callout">
+    <p class="title">什么时候走 plan 轨道</p>
+    <p>
+      触及接口契约、改动全局架构、跨 3 个以上业务模块时，先写方案。方案经过评审、确认接口契约后，
+      再分阶段开发，每个阶段结束时派子 Agent 评审。你也可以直接说「走方案」或「直接改」。
+    </p>
+  </div>
+</section>
+
+<section id="concepts">
+  <p class="kicker">04 · 核心概念</p>
+  <h2>六个词就够了</h2>
+  <p class="lede">
+    WeFi-harness 的规则文件很多，但需要记住的只有六个概念。其余都是它们的具体化。
+  </p>
+
+  <dl class="defs">
+    <div><dt>模式</dt><dd>请求的类型：feature、bugfix、ship、review、explain、discuss。决定加载哪个 Skill。</dd></div>
+    <div><dt>轨道</dt><dd>流程的做法：quick 直接改，plan 先写方案，hotfix 只修故障。只用于 feature 和 bugfix。</dd></div>
+    <div><dt>变更</dt><dd>一件事的记录目录 <code>.wefi/changes/&lt;id&gt;/</code>，含评估、方案、评审记录。</dd></div>
+    <div><dt>门禁</dt><dd><code>wefi gate</code> 执行的检查：类型检查、Lint、测试、构建、调宽检测。</dd></div>
+    <div><dt>项目知识库</dt><dd><code>.wefi/</code> 中本项目自己的内容：规则、模块说明、验证手册。</dd></div>
+    <div><dt>业务知识</dt><dd><code>.wefi/domain/</code> 中从 FSD 和接口表生成的共用知识，几个仓库共用。</dd></div>
+  </dl>
+
+  <h3><span class="idx">4.1</span>项目知识库里的文件</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>路径</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><code>config.yaml</code></td><td>技术栈、门禁命令、审查阈值、项目管理系统、worktree</td></tr>
+        <tr><td><code>rules/</code></td><td>项目规则。和团队规则一起，由 <code>wefi rules</code> 按文件匹配</td></tr>
+        <tr><td><code>knowledge/</code></td><td>架构说明和模块说明。<code>README.md</code> 是知识表：哪些改动读哪个文件</td></tr>
+        <tr><td><code>verify.md</code></td><td>运行验证手册：启动、登录、功能地图、构造数据、已知的坑</td></tr>
+        <tr><td><code>lessons.md</code></td><td>教训台账</td></tr>
+        <tr><td><code>specs/</code>、<code>changes/</code>、<code>decisions/</code>、<code>sources/</code></td><td>规格；一件事从评估到完成的文档；设计决策；原始材料索引</td></tr>
+        <tr><td><code>state/</code></td><td>本地状态：issue 快照、截图、开发服务器。不提交</td></tr>
+        <tr><td><code>domain/</code></td><td>业务知识的本地 clone，见 <code>domain.repo</code>。不提交</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="routing">
+  <p class="kicker">05 · 工作方式</p>
+  <h2>你说一句话，它选哪条流程</h2>
+  <p class="lede">
+    路由是 WeFi-harness 最核心的部分。它不靠 AI 猜，而是由 Skill 的 <code>description</code>、
+    <code>hooks/router-card.md</code> 和 <code>references/routing.md</code> 三处共同决定。
+    你也可以用 <code>/wefi</code> 直接指定。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>你说</th><th>模式</th><th>Skill</th><th>AI 做什么</th></tr></thead>
+      <tbody>
+        <tr><td>「做一下 PDB-123」</td><td><code>feature</code></td><td><code>wefi-feature</code></td><td>读 issue 当需求，按风险选 quick 或 plan</td></tr>
+        <tr><td>「给申请列表加导出」</td><td><code>feature</code></td><td><code>wefi-feature</code></td><td>按风险选轨道；触及接口时走 plan</td></tr>
+        <tr><td>「列表翻页后数据重复，修一下」</td><td><code>bugfix</code></td><td><code>wefi-bugfix</code></td><td>复现，写回归测试，修复，再跑门禁</td></tr>
+        <tr><td>「线上登录挂了，紧急修」</td><td><code>bugfix</code></td><td><code>wefi-bugfix</code></td><td>从默认分支拉 <code>hotfix/</code> 分支，只修故障</td></tr>
+        <tr><td>「提个 PR」「CI 挂了」</td><td><code>ship</code></td><td><code>wefi-ship</code></td><td>门禁、同步默认分支、提交、开 PR、回写 issue</td></tr>
+        <tr><td>「review 一下 #123」</td><td><code>review</code></td><td><code>wefi-review-pr</code></td><td>按严重度列出有证据的发现，不改代码</td></tr>
+        <tr><td>「登录态是怎么刷新的」</td><td><code>explain</code></td><td><code>wefi-explain</code></td><td>先读项目知识，再读代码，区分事实和推断</td></tr>
+        <tr><td>「状态管理用 Zustand 还是 Context」</td><td><code>discuss</code></td><td><code>wefi-discuss</code></td><td>2 到 3 个选项和推荐，不改代码</td></tr>
+        <tr><td>「PDB-123 能开工吗」</td><td><code>discuss</code></td><td><code>wefi-discuss</code></td><td>评估需求，结论和最多 5 条待确认</td></tr>
+        <tr><td>「看看这份技术方案有没有问题」</td><td><code>discuss</code></td><td><code>wefi-discuss</code></td><td>评审方案文档：实现者的问题、发现、结论</td></tr>
+        <tr><td>「登录页偶尔白屏，帮我提个 issue」</td><td class="dim">不加载</td><td class="dim">—</td><td>按模板直接创建 issue，不改代码</td></tr>
+        <tr><td>「同样的错又出现了」</td><td class="dim">—</td><td><code>wefi-learn</code></td><td>优先把教训变成类型、Lint 规则或测试</td></tr>
+        <tr><td>「接着昨天的做」</td><td class="dim">—</td><td><code>wefi</code></td><td>从分支、方案和 issue 快照找回断点</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3><span class="idx">5.1</span>指定流程</h3>
+  <pre><span class="c"># Codex 中是 $wefi</span>
+<span class="k">/wefi</span> feature quick 给申请列表加导出     <span class="c"># 指定模式和轨道</span>
+<span class="k">直接改：</span>把按钮文字改成 Log In             <span class="c"># 轨道 quick</span>
+<span class="k">走方案：</span>给申请列表加导出 Excel            <span class="c"># 轨道 plan</span>
+<span class="k">/wefi</span> feature plan --wt 给申请列表加导出   <span class="c"># 在新的 worktree 中做</span>
+<span class="k">/wefi</span> resume                              <span class="c"># 接着上次做</span>
+<span class="k">/wefi</span> status                              <span class="c"># 进行中的工作</span>
+<span class="k">/wefi</span> update                              <span class="c"># 马上更新 WeFi</span>
+<span class="k">/wefi</span> doctor                              <span class="c"># 检查安装和配置</span></pre>
+</section>
+
+<section id="skills">
+  <p class="kicker">06 · 工作方式</p>
+  <h2>十个 Skill，一条流水线</h2>
+  <p class="lede">
+    Skill 是 AI 的入口：每个 <code>SKILL.md</code> 说明什么时候用它、按什么步骤做。
+    它们各管一段，按阶段串起来就是完整的开发流程。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>阶段</th><th>Skill</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td>入口</td><td><code>wefi</code></td><td><code>/wefi</code> 的参数、接着做、hotfix、状态、更新、检查、命令列表</td></tr>
+        <tr><td>理解</td><td><code>wefi-explain</code></td><td>现有代码怎么工作、为什么这样写、该放在哪里</td></tr>
+        <tr><td>理解</td><td><code>wefi-discuss</code></td><td>设计选型、需求评估、方案评审</td></tr>
+        <tr><td>开发</td><td><code>wefi-feature</code></td><td>新增、修改、重构、优化。quick 和 plan 两个轨道</td></tr>
+        <tr><td>开发</td><td><code>wefi-bugfix</code></td><td>报错、回归、结果不对、线上故障。包括 hotfix</td></tr>
+        <tr><td>验证</td><td><code>wefi-verify</code></td><td>门禁、浏览器验证、复核验证手册</td></tr>
+        <tr><td>交付</td><td><code>wefi-ship</code></td><td>提交、push、开 PR、处理评论和 CI、回写 issue</td></tr>
+        <tr><td>交付</td><td><code>wefi-review-pr</code></td><td>审查别人的 PR 或 diff</td></tr>
+        <tr><td>改进</td><td><code>wefi-learn</code></td><td>把教训落地，回顾对话</td></tr>
+        <tr><td>接入</td><td><code>wefi-onboard</code></td><td>补全项目知识库，选择项目管理系统</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    <code>SKILL.md</code> 本身很短，10 个合计 469 行。具体步骤写在各自的 <code>references/</code> 里，
+    由 Skill 按需引用。这样路由卡保持轻量，流程细节不占上下文。
+  </p>
+</section>
+
+<section id="architecture">
+  <p class="kicker">07 · 技术拆解</p>
+  <h2>三层结构</h2>
+  <p class="lede">
+    整个框架没有服务端，全部以文本文件和 Node 脚本的形式存在业务仓库旁边。
+    下图是 AI 处理一次请求时实际读到的内容。
+  </p>
+
+  <div class="arch">
+    <svg viewBox="0 0 880 380" width="100%" role="img" aria-label="WeFi-harness 三层结构图">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" opacity=".5"/>
+        </marker>
+      </defs>
+      <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="currentColor">
+        <text x="440" y="24" text-anchor="middle" font-size="13" font-weight="600">你的请求</text>
+        <line x1="440" y1="34" x2="440" y2="52" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
+
+        <rect x="60" y="56" width="760" height="50" rx="7" fill="none" stroke="currentColor" stroke-opacity=".18"/>
+        <text x="76" y="76" font-size="10.5" fill-opacity=".5">宿主适配层</text>
+        <text x="76" y="94" font-size="11.5">Claude Code：SessionStart Hook 注入 router-card.md</text>
+        <text x="470" y="94" font-size="11.5">Codex、Cursor：AGENTS.md 的 WeFi 节</text>
+
+        <line x1="440" y1="106" x2="440" y2="126" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
+        <rect x="240" y="130" width="400" height="42" rx="7" fill="currentColor" fill-opacity=".045" stroke="currentColor" stroke-opacity=".3"/>
+        <text x="440" y="149" text-anchor="middle" font-size="12" font-weight="600">路由卡：请求 → 模式 → Skill</text>
+        <text x="440" y="164" text-anchor="middle" font-size="10.5" fill-opacity=".5">hooks/router-card.md · references/routing.md</text>
+
+        <line x1="440" y1="172" x2="440" y2="192" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
+        <rect x="60" y="196" width="760" height="58" rx="7" fill="currentColor" fill-opacity=".045" stroke="currentColor" stroke-opacity=".3"/>
+        <text x="76" y="216" font-size="11.5" font-weight="600">Skill 层</text>
+        <text x="152" y="216" font-size="11" fill-opacity=".6">10 个 SKILL.md，合计 469 行</text>
+        <text x="76" y="236" font-size="10.5" fill-opacity=".45">feature · bugfix · ship · verify · review-pr · explain · discuss · learn · onboard · wefi</text>
+
+        <line x1="440" y1="254" x2="440" y2="274" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
+        <rect x="60" y="278" width="760" height="42" rx="7" fill="none" stroke="currentColor" stroke-opacity=".18"/>
+        <text x="76" y="298" font-size="11.5" font-weight="600">流程层</text>
+        <text x="152" y="298" font-size="11" fill-opacity=".6">references/ · 28 个共用流程文件</text>
+        <text x="460" y="298" font-size="11" fill-opacity=".6">按需引用，不是每次全读</text>
+
+        <line x1="440" y1="320" x2="440" y2="338" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
+        <rect x="60" y="342" width="760" height="32" rx="7" fill="none" stroke="currentColor" stroke-opacity=".18"/>
+        <text x="76" y="363" font-size="11.5" font-weight="600">数据层</text>
+        <text x="152" y="363" font-size="11" fill-opacity=".6">wefi.mjs（CLI，2627 行）· references/rules/（7 个规则文件）· .wefi/（项目知识库）</text>
+      </g>
+    </svg>
+  </div>
+  <p class="arch-caption">
+    图 1 · 一次请求实际读到的内容。宿主层和路由卡每次都注入，Skill 和流程按需读。
+  </p>
+</section>
+
+<section id="context">
+  <p class="kicker">08 · 技术拆解</p>
+  <h2>上下文装载：按需，且不重复</h2>
+  <p class="lede">
+    Agent 框架最常见的浪费，是把所有文档一次塞给模型。WeFi-harness 的做法相反：
+    <strong>流程文件写明在哪一步读什么，没写就不读</strong>。
+  </p>
+
+  <div class="grid c3">
+    <div class="card">
+      <span class="tag">动作 1</span>
+      <h4>装规则</h4>
+      <p>改代码或审查代码之前执行。运行 <code>wefi rules &lt;要改的文件&gt;</code>，读输出中列出的规则文件。</p>
+      <div class="foot">已读过的，本任务不再读</div>
+    </div>
+    <div class="card">
+      <span class="tag">动作 2</span>
+      <h4>装知识</h4>
+      <p>读知识表 <code>.wefi/knowledge/README.md</code>，只读「什么时候读」条件成立的文件。</p>
+      <div class="foot">条件都不成立时不读</div>
+    </div>
+    <div class="card">
+      <span class="tag">动作 3</span>
+      <h4>装业务知识</h4>
+      <p>先搜再看索引。用 <code>wefi domain search</code> 按需求里的页面名、字段名定位章节。</p>
+      <div class="foot">搜不到时才看总入口</div>
+    </div>
+  </div>
+
+  <h3><span class="idx">8.1</span>为什么先搜再读</h3>
+  <p>
+    一次需求评估曾在索引上花了约 <strong>3.5 万字符</strong>，占读业务知识的一半，而核心章节是靠搜索找到的。
+    所以流程改成：先用需求里的专有名词搜，列出的文件少时直接读；搜不到时才看总入口和章节索引。
+  </p>
+  <p>
+    这条规则写在 <code>references/context-loading.md</code>。它不是建议，是必须遵守的约束：
+    多装的内容会挤掉当前任务需要的信息。
+  </p>
+
+  <h3><span class="idx">8.2</span>规则和知识为什么分开放</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>规则</th><th>知识</th></tr></thead>
+      <tbody>
+        <tr><td class="dim">回答的问题</td><td>必须怎么做</td><td>现在是什么样</td></tr>
+        <tr><td class="dim">措辞</td><td>「必须」「不得」「可以」</td><td>陈述句，不写「必须」</td></tr>
+        <tr><td class="dim">什么时候读</td><td>改代码、审查代码前</td><td>写方案、讲解、评估需求时</td></tr>
+        <tr><td class="dim">来源</td><td>团队 + 项目</td><td>项目 + 共用业务知识</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="release">
+  <p class="kicker">09 · 技术拆解</p>
+  <h2>更新分发：一个 tag 服务所有人</h2>
+  <p class="lede">
+    框架同时服务多个团队，但业务仓库里不提交它的副本。每个人本地有一个 clone，
+    每天第一次使用时自动切到最新 tag。
+  </p>
+
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span>发布与更新</span></div>
+    <div class="term-body">
+      <span class="ln dim"># 维护人</span>
+      <span class="ln o">Actions → release → patch</span>
+      <span class="ln o">&nbsp;&nbsp;├─ 构建并测试</span>
+      <span class="ln o">&nbsp;&nbsp;├─ 提交版本号</span>
+      <span class="ln o">&nbsp;&nbsp;├─ 在后面做一个只含运行文件的提交</span>
+      <span class="ln o">&nbsp;&nbsp;└─ 打 tag v0.2.8，推送</span>
+      <span class="ln dim"># 每个开发者，第二天第一次使用</span>
+      <span class="ln o">SessionStart Hook，或 wefi status</span>
+      <span class="ln o">&nbsp;&nbsp;├─ git fetch</span>
+      <span class="ln o">&nbsp;&nbsp;├─ 切到最新的 tag</span>
+      <span class="ln o">&nbsp;&nbsp;└─ AI 在回复中说一行「WeFi 已更新到 0.2.8：…」</span>
+    </div>
+  </div>
+
+  <h3><span class="idx">9.1</span>不更新的情况</h3>
+  <ul>
+    <li>clone 中有未提交的改动。</li>
+    <li>clone 在贡献分支上。</li>
+    <li>环境变量 <code>WEFI_HARNESS_NO_UPDATE=1</code>。</li>
+  </ul>
+
+  <h3><span class="idx">9.2</span>为什么 tag 只含运行文件</h3>
+  <p>
+    开发用的 <code>bin/</code>、<code>scripts/</code>、<code>test/</code>、<code>evals/</code> 不在发布 tag 中。
+    所以业务仓库里的 <code>.wefi/harness/</code> 是干净的。需要完整源码时，<code>wefi contribute</code>
+    从 <code>main</code> 开分支。
+  </p>
+  <p>
+    这带来一个结果：<strong>合入 main 的改动不会立刻影响任何人</strong>。发版后才到达所有人。
+    维护人可以合并多个 PR 再一起发。
+  </p>
+</section>
+
+<section id="tradeoffs">
+  <p class="kicker">10 · 技术拆解</p>
+  <h2>设计取舍</h2>
+  <p class="lede">下面五条是刻意的取舍。写出来，是为了让想改它的人知道代价在哪。</p>
+
+  <h3><span class="idx">10.1</span>为什么是两档轨道，不是三档</h3>
+  <p>
+    早期设计用 S/M/L 三档。实际使用后收敛成 quick 和 plan 两档，hotfix 作为 bugfix 的一种。
+    原因：<strong>档位越多，AI 和人都要多判断一次</strong>。两档的边界足够清楚：
+    改一个文件就是 quick，触及接口就是 plan。
+  </p>
+
+  <h3><span class="idx">10.2</span>为什么审查阈值是 300 行或共享路径</h3>
+  <p>
+    审查要花真实的时间和 token。小改动派审查，成本高于收益；不设阈值，大改动就会裸奔。
+    300 行是经验值，写在 <code>.wefi/config.yaml</code> 的 <code>review.max_lines</code>，项目可以调。
+  </p>
+
+  <h3><span class="idx">10.3</span>为什么规则按文件匹配，不按目录</h3>
+  <p>
+    前端的 <code>*.tsx</code> 和 <code>*.css</code> 适用的规则不同。按目录匹配会让读到的规则变多，
+    按 glob 匹配可以让只改样式的人不读到 TypeScript 规则。
+  </p>
+  <p>
+    规则文件的 frontmatter 写 <code>paths</code>，<code>[]</code> 表示全局。项目规则用同名文件覆盖团队规则。
+  </p>
+
+  <h3><span class="idx">10.4</span>为什么不做自己的 CI</h3>
+  <p>
+    门禁调用的是项目自己的 <code>typecheck</code>、<code>lint</code>、<code>test</code>、<code>build</code> 命令。
+    WeFi-harness 不替代 CI。它增加的是<strong>在提交之前</strong>跑到同样的检查，并把结果写进汇报。
+  </p>
+  <p>
+    调宽检测是 WeFi 自己加的：列出新增的 <code>any</code>、<code>@ts-ignore</code>、
+    <code>eslint-disable</code>、跳过的测试。
+  </p>
+
+  <h3><span class="idx">10.5</span>为什么审查交给子 Agent</h3>
+  <p>
+    写代码的上下文不能自己批准自己。子 Agent 不继承当前对话，只拿到 diff 和审查清单，
+    所以它看不到写代码时的「我是这么想的」，只能看代码本身。
+  </p>
+</section>
+
+<section id="cli">
+  <p class="kicker">11 · 参考</p>
+  <h2>命令速查</h2>
+  <p class="lede">
+    在业务仓库根目录运行 <code>node .wefi/harness/wefi.mjs &lt;命令&gt;</code>。
+    AI 按 Skill 的说明自己运行，人常用下面这几个。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>命令</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>doctor</code></td><td>检查框架 clone、工具入口、配置、规则和 MCP</td></tr>
+        <tr><td><code>status</code></td><td>框架版本和进行中的工作。每天第一次运行时自动更新</td></tr>
+        <tr><td><code>update</code></td><td>马上更新框架到最新的发布版本</td></tr>
+        <tr><td><code>gate</code></td><td>运行门禁：类型检查、Lint、测试、构建、调宽检测</td></tr>
+        <tr><td><code>rules --all</code></td><td>列出全部生效的规则</td></tr>
+        <tr><td><code>serve</code></td><td>启动本目录的开发服务器。<code>serve stop</code> 停止</td></tr>
+        <tr><td><code>worktree list</code></td><td>列出 worktree 和其中的工作</td></tr>
+        <tr><td><code>contribute start &lt;slug&gt;</code></td><td>在 <code>.wefi/harness/</code> 中开分支，修改框架</td></tr>
+        <tr><td><code>contribute finish</code></td><td>检查、push、向 WeFi-harness 开 PR，切回发布版本</td></tr>
+        <tr><td><code>domain search &lt;词…&gt;</code></td><td>在业务知识中搜章节，最相关的在前</td></tr>
+        <tr><td><code>decide &lt;数据.json&gt;</code></td><td>检查数据，生成逐条裁决页面</td></tr>
+        <tr><td><code>new &lt;slug&gt;</code></td><td>新建 plan 轨道的变更目录</td></tr>
+        <tr><td><code>worktree new &lt;类型&gt;/&lt;slug&gt;</code></td><td>新建 worktree：拉分支、复制 env、安装依赖</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>全部命令见 <code>node .wefi/harness/wefi.mjs help</code>。</p>
+</section>
+
+<section id="matrix">
+  <p class="kicker">12 · 参考</p>
+  <h2>支持矩阵</h2>
+  <p class="lede">WeFi-harness 目前只提供前端技术栈的档案和规则。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>工具</th><th>状态</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code</td><td>支持</td><td>会话开始时由项目 Hook 注入路由卡</td></tr>
+        <tr><td>Codex</td><td>支持</td><td><code>AGENTS.md</code> 的 WeFi 节提供路由卡</td></tr>
+        <tr><td>Cursor</td><td>实验性</td><td><code>sync</code> 生成 <code>.cursor/skills/</code> 入口</td></tr>
+        <tr><td>Windows</td><td>支持</td><td>git 默认不检出符号链接，引导脚本把占位文件换成本地目录联接</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3><span class="idx">12.1</span>技术栈</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>技术栈</th><th>档案</th><th>规则</th></tr></thead>
+      <tbody>
+        <tr><td>前端</td><td><code>profile-frontend.md</code></td><td><code>references/rules/frontend/</code>：ui-design、react、frontend、ui-text、typescript</td></tr>
+        <tr><td>后端</td><td colspan="2">设计中，见 <code>docs/multi-stack-design.md</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <p class="title">关于仓库可见性</p>
+    <p>
+      框架仓库是私有仓库。运行 <code>npx github:WeFi-Harness/WeFi-harness onboard</code> 前，
+      必须能用 git 访问它。没有权限时，先找维护人开通。
+    </p>
+  </div>
+</section>
+
+<section id="evals">
+  <p class="kicker">13 · 参考</p>
+  <h2>评测：在真实会话里跑</h2>
+  <p class="lede">
+    流程写得对不对，不能靠读文档判断。WeFi-harness 的评测用无头模式运行真实的 Claude Code 和 Codex，
+    在业务仓库副本上执行请求，再按断言判定。
+  </p>
+
+  <div class="grid c3">
+    <div class="card">
+      <span class="tag">步骤 1</span>
+      <h4>准备夹具</h4>
+      <p>复制业务仓库，删除 git 远端，运行 <code>sync</code>，提交。</p>
+      <div class="foot">只读，每次运行复制新的</div>
+    </div>
+    <div class="card">
+      <span class="tag">步骤 2</span>
+      <h4>运行场景</h4>
+      <p><code>evals/run.mjs</code> 发出请求，记录读过的文件、运行的命令、改动和 diff。</p>
+      <div class="foot">支持 --only、--tools、--repeat、--jobs</div>
+    </div>
+    <div class="card">
+      <span class="tag">步骤 3</span>
+      <h4>有无对比</h4>
+      <p>同一请求在有 WeFi 和没有 WeFi 的夹具上各跑一次，按 base 场景的断言判定验收。</p>
+      <div class="foot">现有对照：小改动、接口变更、缺陷修复</div>
+    </div>
+  </div>
+
+  <p>
+    发版前必须运行路由评测。改了某个 Skill 的流程时，必须运行该 Skill 的端到端评测。
+  </p>
+</section>
+
+<section id="troubleshooting">
+  <p class="kicker">14 · 参考</p>
+  <h2>出问题时</h2>
+  <p class="lede">大部分问题落在下面几类。每条都写明做法，不用猜。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>情况</th><th>做法</th></tr></thead>
+      <tbody>
+        <tr><td>这次对话不想用 WeFi</td><td>输入 <code>/wefi off</code>。只对本对话有效，<code>/wefi on</code> 恢复</td></tr>
+        <tr><td>AI 选的流程不对</td><td>说「直接改」「走方案」，或 <code>/wefi &lt;模式&gt; &lt;轨道&gt;</code></td></tr>
+        <tr><td>AI 说没有 IssueHub MCP</td><td>按 <code>references/tracker.md</code> 的「安装」节安装，重启工具。也可以把 issue 内容贴进对话</td></tr>
+        <tr><td>汇报写「跳过：浏览器验证」</td><td>你的工具没有浏览器 MCP。按 <code>references/tools.md</code> 的「浏览器」节安装 Playwright MCP</td></tr>
+        <tr><td>门禁写「依赖没有安装」</td><td>按输出运行安装命令，例如 <code>npm ci</code></td></tr>
+        <tr><td>状态第一行写「失败：本项目要求 WeFi ≥ x」</td><td>运行 <code>node .wefi/bootstrap.mjs</code>，按输出处理。常见原因：没有本仓库的读权限、离线</td></tr>
+        <tr><td>想马上用新版本</td><td>输入 <code>/wefi update</code>，或运行 <code>node .wefi/harness/wefi.mjs update</code></td></tr>
+        <tr><td>不确定配置对不对</td><td>运行 <code>node .wefi/harness/wefi.mjs doctor</code>，按输出修复</td></tr>
+        <tr><td>项目不再使用 WeFi</td><td>运行 <code>npx github:WeFi-Harness/WeFi-harness remove</code>。删除框架文件，保留 <code>.wefi/</code> 中的项目知识</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="contribute">
+  <p class="kicker">15 · 参与</p>
+  <h2>贡献</h2>
+  <p class="lede">
+    所有改动都走 PR。合入 main 不会发版。维护人发版后，每个开发者业务仓库中的
+    <code>.wefi/harness/</code> clone 在当天第一次使用时自动切到新版本。
+  </p>
+
+  <div class="grid c2">
+    <div class="card">
+      <span class="tag">路径 A · 推荐</span>
+      <h4>在业务仓库中贡献</h4>
+      <p><code>.wefi/harness/</code> 就是本仓库的 clone。发现问题时不用另外克隆。</p>
+      <div class="foot">wefi contribute start → 修改 → finish</div>
+    </div>
+    <div class="card">
+      <span class="tag">路径 B</span>
+      <h4>直接改本仓库</h4>
+      <p>克隆 <code>WeFi-Harness/WeFi-harness</code>，建分支，改完开 PR。</p>
+      <div class="foot">需要仓库的写权限</div>
+    </div>
+  </div>
+
+  <h3><span class="idx">15.1</span>改什么，去哪个文件</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>想改的东西</th><th>文件</th></tr></thead>
+      <tbody>
+        <tr><td>所有项目共用、与技术栈无关的规则</td><td><code>references/rules/*.md</code></td></tr>
+        <tr><td>一个技术栈的规则</td><td><code>references/rules/&lt;技术栈&gt;/*.md</code></td></tr>
+        <tr><td>一个技术栈的流程内容</td><td><code>references/profile-&lt;技术栈&gt;.md</code></td></tr>
+        <tr><td>路由：什么请求进哪个 Skill</td><td>各 Skill 的 <code>description</code>、<code>hooks/router-card.md</code>、<code>references/routing.md</code></td></tr>
+        <tr><td>quick 轨道的步骤</td><td><code>skills/wefi-feature/references/quick.md</code></td></tr>
+        <tr><td>门禁检查</td><td><code>skills/wefi-verify/references/gate.md</code>、<code>wefi.mjs</code> 的 <code>cmdGate</code></td></tr>
+        <tr><td>项目接入时生成的初稿</td><td><code>templates/wefi/</code>、<code>skills/wefi-onboard/</code></td></tr>
+        <tr><td>自动更新、贡献命令</td><td><code>wefi.mjs</code> 的 <code>updateHarness</code>、<code>cmdContribute</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3><span class="idx">15.2</span>PR 要求</h3>
+  <ul>
+    <li>中文文字按 <code>references/style.md</code> 写。</li>
+    <li><code>npm run build</code> 和 <code>npm test</code> 必须通过。CI 会运行它们。</li>
+    <li>改了路由时，在 PR 中写出用 Claude Code 和 Codex 各试了哪些请求、结果是什么。</li>
+    <li>在 <code>CHANGELOG.md</code> 的「未发布」节写本次改动。</li>
+  </ul>
+</section>
+
+<section id="roadmap">
+  <p class="kicker">16 · 参与</p>
+  <h2>路线图与现状</h2>
+  <p class="lede">当前版本 v0.2.7。以下是从更新日志挑出的关键节点。</p>
+
+  <ul class="versions">
+    <li><span class="vnum">v0.2.7</span><span class="vbody"><strong>业务知识</strong> — 几个仓库共用一份从 FSD 生成的知识，需求评估和写方案时必读。</span></li>
+    <li><span class="vnum">v0.2.3</span><span class="vbody"><strong>需求评估</strong> — 问「能开工吗」时给出结论和最多 5 条待确认，写进变更目录。</span></li>
+    <li><span class="vnum">v0.2.1</span><span class="vbody"><strong>精简发布</strong> — 发布 tag 只含运行文件，团队规则移到 <code>references/rules</code>。</span></li>
+    <li><span class="vnum">v0.2.0</span><span class="vbody"><strong>集中管理</strong> — 框架改为每人本地的 git clone，每天自动更新。</span></li>
+    <li><span class="vnum">v0.1.0</span><span class="vbody"><strong>首个版本</strong> — 前端 MVP：两档轨道、门禁、子 Agent 审查、变更目录。</span></li>
+  </ul>
+
+  <h3><span class="idx">16.1</span>现状</h3>
+  <div class="grid c2">
+    <div class="card">
+      <span class="tag">现在</span>
+      <h4>已支持</h4>
+      <p>前端技术栈的档案和规则；Claude Code、Codex 完整支持；Cursor 实验性；Windows 可用。</p>
+      <div class="foot">v0.2.7</div>
+    </div>
+    <div class="card">
+      <span class="tag">尚未</span>
+      <h4>后端等其他技术栈</h4>
+      <p>多技术栈的设计已经完成，档案和规则还没有落地。</p>
+      <div class="foot">见 <code>docs/multi-stack-design.md</code></div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>WeFi-harness · WeFi 团队的 AI 开发流程</span>
+    <span>
+      <a href="https://github.com/WeFi-Harness/WeFi-harness">源码</a>
+      <a href="https://github.com/WeFi-Harness/WeFi-harness/blob/main/CHANGELOG.md">更新日志</a>
+      <a href="https://github.com/WeFi-Harness/WeFi-harness/blob/main/CONTRIBUTING.md">贡献指南</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var navLinks = Array.prototype.slice.call(
+    document.querySelectorAll('.sidebar a[href^="#"]')
+  );
+  var sidebar = document.querySelector('.sidebar');
+  var sections = Array.prototype.slice.call(
+    document.querySelectorAll('main section[id]')
+  );
+
+  function setCurrent() {
+    var fromTop = window.scrollY + 130;
+    var current = sections.length ? sections[0].id : null;
+
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].offsetTop <= fromTop) current = sections[i].id;
+    }
+
+    navLinks.forEach(function (link) {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+
+    var activeLink = document.querySelector('.sidebar a.active');
+    if (activeLink && sidebar) {
+      var top = activeLink.offsetTop;
+      var bottom = top + activeLink.offsetHeight;
+      if (top < sidebar.scrollTop + 12 || bottom > sidebar.scrollTop + sidebar.clientHeight - 12) {
+        sidebar.scrollTop = top - sidebar.clientHeight / 2;
+      }
+    }
+  }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      setCurrent();
+      ticking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  setCurrent();
+})();
+</script>
+
+</body>
+</html>
