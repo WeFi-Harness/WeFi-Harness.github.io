@@ -12,20 +12,65 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230f7a63%22/><text x=%2250%22 y=%2268%22 font-size=%2252%22 text-anchor=%22middle%22 font-family=%22monospace%22 font-weight=%22bold%22 fill=%22white%22>W</text></svg>">
 <style>
 :root {
+  /* 间距：4/8pt 体系 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* 字号：相邻层级比 ≥ 1.2 */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+
+  /* 字重：只用 3 档 */
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* 行高 */
+  --leading-tight: 1.3;
+  --leading-normal: 1.7;
+
+  /* 正文行宽：中文 30~40 字 */
+  --measure-zh: 38em;
+
+  /* 圆角：3 档，每档绑定一类组件 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+
+  /* 交互 */
+  --touch-min: 44px;
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+
+  /* 色彩：中性 5 级 + 主色 1 个 + 语义色 */
   --bg: #ffffff;
   --bg-soft: #f6f8fa;
   --bg-inset: #eef1f4;
   --fg: #1a202c;
   --fg-muted: #55606b;
-  --fg-faint: #8b949e;
+  --fg-faint: #67717d;
   --line: #d8dee4;
   --accent: #0f7a63;
   --accent-soft: #e7f4f0;
   --accent-line: #9ad7c8;
   --warn: #8a5a00;
   --warn-soft: #fff8c5;
+  --danger: #b42318;
   --code-bg: #f6f8fa;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* 衬线正文：macOS 用 Songti SC，Windows 用中易宋体，Linux 回退到思源宋体 / Noto。
+     西文排在中文前，英文和数字用 Charter / Georgia，与宋体同属旧式衬线，属协调关系（T1）。
+     不内嵌字体文件：这三个平台都有预装衬线，内嵌会让单文件涨到数 MB。 */
+  --serif: "Charter", "Iowan Old Style", Georgia, "Songti SC", "STSong", "SimSun", "Source Han Serif SC", "Noto Serif CJK SC", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
@@ -35,7 +80,7 @@
     --bg-inset: #1c2129;
     --fg: #e6edf3;
     --fg-muted: #9198a1;
-    --fg-faint: #6e7681;
+    --fg-faint: #7d8590;
     --line: #30363d;
     --accent: #3fd0b0;
     --accent-soft: #10241f;
@@ -46,23 +91,23 @@
   }
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--space-8); }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--sans);
-  font-size: 16px;
+  font-family: var(--serif);
+  font-size: var(--text-base);
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--space-5); }
 .layout {
   display: grid;
   grid-template-columns: 224px minmax(0, 1fr);
-  gap: 52px;
+  gap: var(--space-6);
   align-items: start;
-  padding-top: 36px;
+  padding-top: var(--space-5);
 }
 main { min-width: 0; padding-bottom: 24px; }
 
@@ -76,141 +121,163 @@ main { min-width: 0; padding-bottom: 24px; }
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--line);
 }
-.topbar-inner { display: flex; align-items: center; gap: 18px; height: 56px; }
-.brand {
+.topbar-inner {
+  font-family: var(--sans);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-4);
+  height: 56px;
+}
+.brand {
+  font-family: var(--sans);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-right: auto;
   color: var(--fg);
-  font-weight: 650;
-  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
   text-decoration: none;
 }
 .logo {
   width: 22px; height: 22px;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   background: var(--accent);
   color: #fff;
   display: grid; place-items: center;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--text-xs);
   font-weight: 700;
 }
 .ver {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--fg-muted);
   background: var(--bg-inset);
   border: 1px solid var(--line);
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-2);
   border-radius: 999px;
 }
 .topbar a.link {
+  font-family: var(--sans);
   color: var(--fg-muted);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
 }
 .topbar a.link:hover { color: var(--fg); }
 
 /* 侧栏 */
 .sidebar {
+  font-family: var(--sans);
   position: sticky;
-  top: 36px;
-  max-height: calc(100vh - 72px);
+  top: var(--space-6);
+  max-height: calc(100vh - var(--space-8));
   overflow-y: auto;
-  font-size: 13.5px;
-  padding-right: 6px;
+  font-size: var(--text-sm);
+  padding-right: var(--space-2);
 }
 .sidebar::-webkit-scrollbar { width: 8px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--line); border-radius: var(--radius-sm); }
 .side-brand {
   display: none;
 }
-.side-group { margin-bottom: 16px; }
+.side-group { margin-bottom: var(--space-4); }
 .side-label {
-  margin: 0 0 6px 10px;
-  font-size: 10.5px;
+  font-family: var(--sans);
+  margin: 0 0 var(--space-2) var(--space-2);
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--fg-faint);
 }
 .side-group a {
+  font-family: var(--sans);
   display: block;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2);
   color: var(--fg-muted);
   text-decoration: none;
   line-height: 1.45;
   border-left: 2px solid transparent;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 .side-group a:hover { color: var(--fg); background: var(--bg-soft); }
 .side-group a.active {
   color: var(--accent);
   border-left-color: var(--accent);
   background: var(--accent-soft);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
+
+/* 键盘焦点：全站统一焦点环（A4） */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.side-group a:focus-visible { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.btn:focus-visible, .pill:focus-visible { border-radius: var(--radius-md); }
+.wf-trigger:focus-visible, .wf-close:focus-visible { outline-offset: 2px; }
 
 /* 排版 */
 section[id] {
-  padding: 48px 0;
+  padding: var(--space-7) 0;
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: 72px;
+  scroll-margin-top: var(--space-8);
 }
 section[id]:last-of-type { border-bottom: none; }
-h1, h2, h3, h4 { line-height: 1.3; letter-spacing: -.02em; font-weight: 650; margin: 0; }
-h2 { font-size: 26px; margin-bottom: 8px; }
+/* 衬线中文标题不做负字距：汉字本身等宽，压字距会显得局促（T1 协调） */
+h1, h2, h3, h4 { line-height: var(--leading-tight); letter-spacing: -.01em; font-weight: var(--weight-bold); margin: 0; }
+h2 { font-size: var(--text-xl); margin-bottom: var(--space-3); }
 .kicker {
   font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
 }
-.lede { color: var(--fg-muted); font-size: 16.5px; max-width: 62ch; margin: 0 0 26px; }
-h3 { font-size: 18px; margin: 36px 0 10px; display: flex; align-items: baseline; gap: 10px; }
+.lede { color: var(--fg-muted); font-size: var(--text-base); max-width: var(--measure-zh); margin: 0 0 var(--space-5); }
+h3 { font-size: var(--text-lg); margin: var(--space-6) 0 var(--space-3); display: flex; align-items: baseline; gap: var(--space-2); }
 h3:first-child { margin-top: 0; }
-h3 .idx { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--fg-faint); }
-h4 { font-size: 15px; margin: 20px 0 6px; }
-p { margin: 0 0 15px; max-width: 74ch; }
+h3 .idx { font-family: var(--mono); font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--accent); }
+h4 { font-size: var(--text-base); margin: var(--space-5) 0 var(--space-2); }
+p { margin: 0 0 var(--space-4); max-width: var(--measure-zh); line-height: var(--leading-normal); }
 code {
   font-family: var(--mono);
   font-size: .875em;
   background: var(--code-bg);
   border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-1);
 }
 p code, li code, td code, th code { white-space: nowrap; }
 a { color: var(--accent); }
-ul, ol { margin: 0 0 16px; padding-left: 22px; max-width: 74ch; }
-li { margin-bottom: 6px; }
+ul, ol { margin: 0 0 var(--space-4); padding-left: var(--space-4); max-width: var(--measure-zh); }
+li { margin-bottom: var(--space-2); line-height: var(--leading-normal); }
 
 /* Hero */
 .hero {
-  padding: 56px 0 46px;
+  padding: var(--space-6) 0 var(--space-6);
   border-bottom: 1px solid var(--line);
   background: radial-gradient(58% 55% at 82% 0%, var(--accent-soft), transparent 70%), var(--bg);
 }
 .hero h1 {
   font-size: clamp(29px, 4.2vw, 42px);
   line-height: 1.2;
-  letter-spacing: -.028em;
-  max-width: 20ch;
-  margin-bottom: 18px;
+  letter-spacing: -.015em;
+  max-width: 24em;
+  margin-bottom: var(--space-4);
 }
 .hero h1 em { font-style: normal; color: var(--accent); }
-.hero .lede { font-size: 17.5px; margin-bottom: 26px; }
-.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+.hero .lede { font-size: var(--text-base); margin-bottom: var(--space-5); }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-5); }
 .pill {
   font-family: var(--mono);
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--bg-soft);
@@ -219,95 +286,130 @@ li { margin-bottom: 6px; }
 .pill.ok { border-color: var(--accent-line); color: var(--accent); background: var(--accent-soft); }
 .install {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   max-width: 620px;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
 }
 .install-head {
   display: flex;
   justify-content: space-between;
-  padding: 7px 14px;
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--line);
   background: var(--bg-soft);
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: var(--text-xs);
   color: var(--fg-muted);
 }
 .install-body {
-  padding: 13px 16px;
+  padding: var(--space-3) var(--space-4);
   font-family: var(--mono);
-  font-size: 13.5px;
+  font-size: var(--text-sm);
   line-height: 1.7;
   overflow-x: auto;
 }
 .install-body .c { color: var(--fg-faint); }
 .install-body .k { color: var(--accent); font-weight: 600; }
-.install-hint { font-size: 13px; color: var(--fg-muted); margin: 0 0 30px; }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.install-hint { font-size: var(--text-sm); color: var(--fg-muted); margin: 0 0 var(--space-5); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+/* 核心特性 */
+.feats { margin: var(--space-5) 0 0; padding: 0; list-style: none; max-width: none; }
+.feats > li {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--line);
+}
+.feats > li:last-child { border-bottom: 1px solid var(--line); }
+.feats h3 {
+  display: block;
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0;
+}
+.feats p { margin: 0; max-width: var(--measure-zh); }
+.feats ul { margin: var(--space-2) 0 0; padding-left: var(--space-4); max-width: var(--measure-zh); }
+.feats li li { margin-bottom: var(--space-2); }
+.feats li li::marker { color: var(--accent); }
+@media (max-width: 980px) {
+  .feats > li { grid-template-columns: 1fr; gap: var(--space-2); }
+}
 .btn {
+  font-family: var(--sans);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px 17px;
-  border-radius: 8px;
+  min-height: 44px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
   border: 1px solid var(--line);
   background: var(--bg-soft);
   color: var(--fg);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   transition: border-color .15s, transform .15s, filter .15s;
 }
-.btn:hover { border-color: var(--fg-faint); transform: translateY(-1px); }
+.btn:hover { border-color: var(--fg-faint); }
+.btn:active { transform: translateY(1px); background: var(--bg-inset); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn.primary:hover { filter: brightness(1.07); }
+.btn.primary:active { filter: brightness(.96); }
 
 /* 卡片 */
-.grid { display: grid; gap: 14px; margin: 22px 0 6px; }
+.grid { display: grid; gap: var(--space-3); margin: var(--space-4) 0 var(--space-2); }
 .grid.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .card {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 18px 18px 15px;
-  background: var(--bg-soft);
+  gap: var(--space-2);
+  padding: var(--space-5);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 .card .tag {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: .08em;
   color: var(--accent);
-  margin-bottom: 3px;
+  margin-bottom: var(--space-1);
 }
-.card h4 { margin: 0 0 5px; font-size: 15px; }
-.card p { margin: 0; font-size: 14px; color: var(--fg-muted); max-width: none; }
+.card h3 {
+  display: block;
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0;
+}
+.card p { margin: 0; font-size: var(--text-sm); color: var(--fg-muted); max-width: none; }
 .card .foot {
   margin-top: auto;
-  padding-top: 11px;
-  border-top: 1px dashed var(--line);
+  padding-top: var(--space-3);
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: var(--text-xs);
   color: var(--fg-faint);
 }
 
 /* 表格 */
 .table-wrap {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow-x: auto;
-  margin: 20px 0;
+  margin: var(--space-4) 0;
 }
-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
-th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); min-width: 500px; }
+th, td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.6; }
+td, th { font-variant-numeric: tabular-nums; }
 th {
   background: var(--bg-soft);
-  font-size: 12.5px;
-  font-weight: 650;
+  font-family: var(--sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   color: var(--fg-muted);
   white-space: nowrap;
 }
@@ -316,16 +418,16 @@ tbody tr:hover { background: var(--bg-soft); }
 td code { white-space: normal; word-break: break-word; }
 
 /* 时间轴 */
-.timeline { position: relative; margin: 24px 0 4px; padding-left: 26px; list-style: none; max-width: none; }
+.timeline { position: relative; margin: var(--space-5) 0 var(--space-1); padding-left: var(--space-5); list-style: none; max-width: none; }
 .timeline::before {
   content: "";
   position: absolute;
   left: 6px; top: 8px; bottom: 14px;
   width: 2px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   background: linear-gradient(var(--line) 65%, transparent);
 }
-.timeline > li { position: relative; margin-bottom: 18px; padding-left: 4px; }
+.timeline > li { position: relative; margin-bottom: var(--space-4); padding-left: 4px; }
 .timeline > li::before {
   content: "";
   position: absolute;
@@ -336,43 +438,64 @@ td code { white-space: normal; word-break: break-word; }
   border: 2px solid var(--fg-faint);
 }
 .timeline > li.key::before { border-color: var(--accent); background: var(--accent); }
-.tl-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 2px; }
-.tl-title { font-weight: 650; font-size: 15px; }
+.tl-head { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-1); }
+.tl-title { font-weight: var(--weight-semibold); font-size: var(--text-sm); }
 .tl-tag {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--text-xs);
   color: var(--fg-faint);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 1px 7px;
+  padding: var(--space-1) var(--space-2);
   white-space: nowrap;
 }
-.tl-body { margin: 0; color: var(--fg-muted); font-size: 14px; max-width: 66ch; }
+.tl-body { margin: 0; color: var(--fg-muted); font-size: var(--text-sm); line-height: 1.65; max-width: var(--measure-zh); }
 
 /* 提示块 */
 .callout {
-  max-width: 76ch;
-  margin: 20px 0;
-  padding: 14px 18px;
+  max-width: var(--measure-zh);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--accent-line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--accent-soft);
-  font-size: 14.5px;
+  font-size: var(--text-sm);
+  line-height: 1.65;
 }
 .callout.warn { border-color: color-mix(in srgb, var(--warn) 32%, transparent); background: var(--warn-soft); }
-.callout p { margin-bottom: 6px; max-width: none; }
+.callout p { margin-bottom: var(--space-2); max-width: none; }
 .callout p:last-child { margin-bottom: 0; }
-.callout .title { font-weight: 650; margin-bottom: 3px; }
+.callout .title { font-weight: var(--weight-semibold); margin-bottom: var(--space-1); }
+
+/* 状态标记：图标 + 文字 + 颜色，三者同时给出（K3） */
+.st {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+  font-weight: var(--weight-semibold);
+}
+.st::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.st.ok { color: var(--accent); }
+.st.exp { color: var(--warn); }
+.st.no { color: var(--fg-muted); }
 
 /* 代码块 */
 pre {
-  margin: 18px 0;
-  padding: 15px 18px;
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--code-bg);
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: var(--text-sm);
   line-height: 1.7;
   overflow-x: auto;
 }
@@ -381,38 +504,510 @@ pre .k { color: var(--accent); }
 
 /* 架构图 */
 .arch {
-  margin: 22px 0;
-  padding: 20px;
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--bg-soft);
   overflow-x: auto;
 }
 .arch svg { display: block; }
 .arch-caption {
-  margin: 14px 0 0;
+  margin: var(--space-3) 0 0;
   text-align: center;
-  font-size: 12.5px;
+  font-size: var(--text-xs);
   color: var(--fg-faint);
   max-width: none;
 }
 
+/* 流程总览：按钮触发全屏弹窗 */
+.wf-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--fg);
+  width: 100%;
+  transition: border-color .15s, background .15s;
+}
+.wf-trigger:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.wf-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wf-trigger-ico {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+.wf-trigger-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.wf-trigger b { display: block; font-size: var(--text-sm); font-weight: var(--weight-semibold); margin-bottom: var(--space-1); }
+.wf-trigger span { display: block; font-size: var(--text-sm); color: var(--fg-muted); }
+.wf-trigger-hint {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--fg-faint);
+}
+.wf-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.wf-modal.open { display: flex; flex-direction: column; }
+.wf-modal-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.wf-modal-bar h3 {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.wf-modal-bar .sub {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+}
+.wf-modal-bar .spacer { flex: 1; }
+.wf-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.wf-close:hover { color: var(--fg); border-color: var(--fg-faint); }
+.wf-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wf-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.wf-modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.wf-wrap {
+  flex: none;
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-soft);
+}
+.workflow {
+  --wf-ink: var(--fg);
+  --wf-copy: var(--fg-muted);
+  --wf-mute: var(--fg-faint);
+  --wf-rule: var(--line);
+  --wf-card: var(--bg);
+  --wf-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 1px 3px rgba(16, 24, 40, .04);
+  --wf-agent: #2f7a52;
+  --wf-agent-fill: #eef8f2;
+  --wf-agent-line: #a3d6b9;
+  --wf-check: #5048a8;
+  --wf-check-fill: #f4f3fc;
+  --wf-check-line: #bcb6e8;
+  --wf-human: #b8431f;
+  --wf-human-fill: #fdf3ef;
+  --wf-human-line: #f2b9a5;
+  --wf-out: #2a4f95;
+  --wf-out-fill: #eef4fc;
+  --wf-out-line: #aac3e3;
+  color: var(--wf-ink);
+  font-family: var(--sans);
+  width: 1520px;
+}
+@media (prefers-color-scheme: dark) {
+  .workflow {
+    --wf-shadow: none;
+    --wf-agent: #6cc79a;
+    --wf-agent-fill: #13291d;
+    --wf-agent-line: #2c6b47;
+    --wf-check: #a49df0;
+    --wf-check-fill: #1b1830;
+    --wf-check-line: #4a4285;
+    --wf-human: #ef8a68;
+    --wf-human-fill: #2c1812;
+    --wf-human-line: #7a3a25;
+    --wf-out: #8fb6ea;
+    --wf-out-fill: #101d2e;
+    --wf-out-line: #2c4a75;
+  }
+}
+.workflow svg { display: block; overflow: visible; color: var(--wf-mute); }
+.workflow .wf-a {
+  fill: none;
+  stroke: var(--wf-mute);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.workflow .wf-d { stroke-dasharray: 4 5; }
+.workflow .wf-node { border: 1px solid; border-radius: 10px; box-shadow: var(--wf-shadow); }
+.workflow .wf-agent { background: var(--wf-agent-fill); border-color: var(--wf-agent-line); color: var(--wf-agent); }
+.workflow .wf-check { background: var(--wf-check-fill); border-color: var(--wf-check-line); color: var(--wf-check); }
+.workflow .wf-human { background: var(--wf-human-fill); border-color: var(--wf-human-line); color: var(--wf-human); }
+.workflow .wf-tool { background: var(--wf-card); border-color: var(--line); color: var(--wf-ink); }
+.workflow .wf-person { fill: var(--wf-human); }
+
+/* 顶部：人 → 路由卡 ↔ 材料 */
+.wf-control {
+  display: grid;
+  grid-template-columns: 400px 48px 1fr 48px 248px;
+  height: 92px;
+  align-items: center;
+}
+.wf-control > svg { width: 100%; height: 92px; }
+.workflow .wf-setup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: 92px;
+  padding: 0 var(--space-5);
+}
+.workflow .wf-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--wf-card);
+  border: 1px solid var(--wf-human-line);
+}
+.workflow .wf-avatar .wf-person { width: 22px; height: 22px; }
+.workflow .wf-setup b, .workflow .wf-lead b { display: block; font-size: var(--text-lg); line-height: 1.3; font-weight: var(--weight-bold); }
+.workflow .wf-setup span { display: block; margin-top: 2px; font-size: var(--text-sm); line-height: 1.45; color: var(--wf-copy); }
+.workflow .wf-lead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  height: 92px;
+  padding: 0 var(--space-5);
+}
+.workflow .wf-lead small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  font-weight: var(--weight-regular);
+  color: var(--wf-copy);
+}
+.workflow .wf-lead ol {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: space-between;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  border-left: 1px solid var(--wf-agent-line);
+  counter-reset: wf-step;
+}
+.workflow .wf-lead li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  white-space: nowrap;
+  counter-increment: wf-step;
+}
+.workflow .wf-lead li::before {
+  content: counter(wf-step);
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--wf-card);
+  border: 1px solid var(--wf-agent-line);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+.wf-sources { display: grid; grid-template-rows: 1fr 1fr; gap: var(--space-2); height: 92px; }
+.workflow .wf-sources .wf-node {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.workflow .wf-sources .wf-node i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--wf-copy);
+  margin-left: auto;
+}
+
+/* 主干线 → 四段 */
+.wf-bus { width: 1520px; height: 34px; }
+.wf-stages { display: grid; grid-template-columns: repeat(4, 362px); gap: var(--space-5); align-items: stretch; }
+.wf-stage {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  background: var(--wf-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--wf-shadow);
+}
+.wf-stage > header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--wf-rule);
+}
+.wf-stage > header span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--wf-copy);
+}
+.workflow .wf-name { font-size: var(--text-lg); font-weight: var(--weight-bold); line-height: 1.3; }
+.workflow .wf-name small { display: block; font-size: var(--text-xs); font-weight: var(--weight-regular); color: var(--wf-mute); line-height: 1.4; }
+
+/* 段内小图：画布 338 × 274 */
+.wf-dia { position: relative; width: 338px; height: 274px; margin: var(--space-5) 0 var(--space-4); }
+.wf-dia > svg { position: absolute; inset: 0; width: 338px; height: 274px; }
+.workflow .wf-dia .wf-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.workflow .wf-dia .wf-node b { font-size: var(--text-base); line-height: 1.3; font-weight: var(--weight-semibold); white-space: nowrap; }
+.workflow .wf-dia .wf-node span { font-size: var(--text-xs); line-height: 1.4; color: var(--wf-copy); white-space: nowrap; text-align: center; }
+.workflow .wf-t { position: absolute; font-size: var(--text-xs); line-height: 20px; white-space: nowrap; }
+.workflow .wf-e { color: var(--wf-copy); }
+.workflow .wf-obj {
+  position: absolute;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wf-copy);
+  background: var(--bg-soft);
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+}
+.workflow .wf-sep {
+  position: absolute;
+  font-size: var(--text-xs);
+  line-height: 20px;
+  color: var(--wf-mute);
+  background: var(--wf-card);
+  padding: 0 var(--space-2);
+  text-align: center;
+}
+.workflow .wf-group {
+  position: absolute;
+  padding: var(--space-3);
+  border: 1px dashed var(--wf-out-line);
+  border-radius: 10px;
+  background: var(--wf-out-fill);
+}
+.workflow .wf-group b {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--wf-out);
+  text-align: center;
+}
+.workflow .wf-group ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.workflow .wf-group li {
+  padding: 4px var(--space-2);
+  border: 1px solid var(--wf-out-line);
+  border-radius: 6px;
+  background: var(--wf-card);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--wf-ink);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 段内文字：规则 + 产出 */
+.workflow .wf-rules { flex: 1; padding: var(--space-3) var(--space-2) 0; border-top: 1px dashed var(--wf-rule); }
+.workflow .wf-rules > span {
+  position: relative;
+  display: block;
+  padding-left: 14px;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--wf-copy);
+}
+.workflow .wf-rules > span + span { margin-top: 4px; }
+.workflow .wf-rules > span::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--wf-mute);
+}
+.workflow .wf-gate {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-3);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--wf-rule);
+}
+.workflow .wf-gate b { display: block; font-size: var(--text-xs); line-height: 1.4; font-weight: var(--weight-semibold); color: var(--wf-mute); letter-spacing: .5px; }
+.workflow .wf-gate span { display: block; margin-top: 2px; font-size: var(--text-base); line-height: 1.45; font-weight: var(--weight-semibold); }
+
+/* 底部：各段产出 */
+.wf-out {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  background: var(--wf-card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--wf-shadow);
+}
+.workflow .wf-out-label {
+  flex: none;
+  padding-right: var(--space-4);
+  margin-right: var(--space-1);
+  border-right: 1px solid var(--wf-rule);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: .5px;
+  color: var(--wf-mute);
+}
+.workflow .wf-outbox {
+  flex: none;
+  padding: 6px var(--space-4);
+  background: var(--wf-out-fill);
+  border: 1px solid var(--wf-out-line);
+  border-radius: 10px;
+  text-align: center;
+}
+.workflow .wf-outbox b { display: block; font-size: var(--text-sm); line-height: 1.4; font-weight: var(--weight-semibold); color: var(--wf-out); white-space: nowrap; }
+.workflow .wf-outbox span { display: block; font-size: var(--text-xs); line-height: 1.4; color: var(--wf-copy); white-space: nowrap; }
+.workflow .wf-arr { position: relative; flex: 1; min-width: 24px; height: 1.6px; margin-right: 2px; background: var(--wf-mute); border-radius: 1px; }
+.workflow .wf-arr::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-top: 1.6px solid var(--wf-mute);
+  border-right: 1.6px solid var(--wf-mute);
+  transform: translateY(-50%) rotate(45deg);
+}
+.workflow .wf-pill {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 34px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--wf-human-line);
+  border-radius: 999px;
+  background: var(--wf-human-fill);
+  color: var(--wf-human);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+.workflow .wf-pill .wf-person { width: 16px; height: 16px; }
+
+/* 图例 */
+.wf-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-5); margin-top: var(--space-4); }
+.workflow .wf-legend > span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--wf-copy);
+  white-space: nowrap;
+}
+.workflow .wf-sw {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+}
+.workflow .wf-sw.wf-agent { background: var(--wf-agent-fill); border-color: var(--wf-agent-line); }
+.workflow .wf-sw.wf-check { background: var(--wf-check-fill); border-color: var(--wf-check-line); }
+.workflow .wf-sw.wf-human { background: var(--wf-human-fill); border-color: var(--wf-human-line); }
+.workflow .wf-sw.wf-art { background: var(--wf-out-fill); border-color: var(--wf-out-line); }
+.workflow .wf-sw.wf-tool { background: var(--wf-card); border-color: var(--line); }
+
 /* 终端对话 */
-.term { border: 1px solid var(--line); border-radius: 10px; margin: 20px 0; overflow: hidden; }
+.term { border: 1px solid var(--line); border-radius: var(--radius-md); margin: var(--space-4) 0; overflow: hidden; }
 .term-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 13px;
+  gap: var(--space-2);
+  padding: 8px var(--space-3);
   border-bottom: 1px solid var(--line);
   background: var(--bg-soft);
 }
 .term-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: block; }
-.term-bar span { margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--fg-faint); }
+.term-bar span { margin-left: 8px; font-family: var(--mono); font-size: var(--text-xs); color: var(--fg-faint); }
 .term-body {
-  padding: 14px 18px;
+  padding: var(--space-3) var(--space-4);
   font-family: var(--mono);
-  font-size: 12.8px;
+  font-size: var(--text-xs);
   line-height: 1.85;
   overflow-x: auto;
 }
@@ -429,35 +1024,41 @@ pre .k { color: var(--accent); }
 .defs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  margin: 22px 0;
+  gap: var(--space-1);
+  margin: var(--space-4) 0;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--line);
 }
-.defs > div { background: var(--bg); padding: 14px 17px; }
-.defs dt { margin-bottom: 2px; font-family: var(--mono); font-size: 13px; font-weight: 650; color: var(--accent); }
-.defs dd { margin: 0; font-size: 13.5px; color: var(--fg-muted); }
+.defs > div { background: var(--bg); padding: var(--space-3) var(--space-4); }
+.defs dt { margin-bottom: var(--space-1); font-family: var(--mono); font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--accent); }
+.defs dd { margin: 0; font-size: var(--text-sm); color: var(--fg-muted); line-height: 1.6; }
 
 /* 版本 */
-.versions { list-style: none; margin: 22px 0; padding: 0; max-width: none; }
+.versions { list-style: none; margin: var(--space-4) 0; padding: 0; max-width: none; }
 .versions > li {
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
-  gap: 18px;
+  gap: var(--space-4);
   margin: 0;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
 }
 .versions > li:last-child { border-bottom: none; }
-.vnum { font-family: var(--mono); font-size: 12.5px; font-weight: 650; color: var(--accent); padding-top: 2px; }
-.vbody { font-size: 14px; color: var(--fg-muted); }
+.vnum { font-family: var(--mono); font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--accent); padding-top: var(--space-1); }
+.vbody { font-size: var(--text-sm); color: var(--fg-muted); line-height: 1.65; }
 .vbody strong { color: var(--fg); }
 
 /* 页脚 */
-footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: var(--bg-soft); font-size: 13.5px; }
-.footer-inner { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; color: var(--fg-muted); }
+footer {
+  padding: var(--space-5) 0 var(--space-6);
+  border-top: 1px solid var(--line);
+  background: var(--bg-soft);
+  font-family: var(--sans);
+  font-size: var(--text-sm);
+}
+.footer-inner { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: space-between; align-items: center; color: var(--fg-muted); }
 .footer-inner a { color: var(--fg-muted); text-decoration: none; margin-right: 16px; }
 .footer-inner a:hover { color: var(--fg); }
 
@@ -468,14 +1069,14 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   .defs { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .wrap { padding: 0 18px; }
+  .wrap { padding: 0 var(--space-4); }
   .grid.c2, .grid.c3 { grid-template-columns: 1fr; }
-  h2 { font-size: 22px; }
-  .hero { padding: 40px 0 34px; }
-  .hero h1 { font-size: 27px; }
+  h2 { font-size: var(--text-xl); }
+  .hero { padding: var(--space-6) 0 var(--space-5); }
+  .hero h1 { font-size: var(--text-xl); }
   .hide-sm { display: none; }
-  .versions > li { grid-template-columns: 1fr; gap: 2px; }
-  section[id] { padding: 36px 0; }
+  .versions > li { grid-template-columns: 1fr; gap: var(--space-1); }
+  section[id] { padding: var(--space-5) 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -488,10 +1089,10 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
 <header class="topbar">
   <div class="wrap topbar-inner">
     <a class="brand" href="#top"><span class="logo">W</span><span>WeFi-harness</span></a>
-    <span class="ver">v0.2.7</span>
+    <span class="ver" data-version>v0.2.8</span>
     <a class="link hide-sm" href="https://github.com/WeFi-Harness/WeFi-harness">GitHub</a>
     <a class="link hide-sm" href="https://github.com/WeFi-Harness/WeFi-harness/blob/main/CHANGELOG.md">更新日志</a>
-    <a class="link" href="#install">快速开始</a>
+    <a class="link" href="#install">接入业务仓库</a>
   </div>
 </header>
 
@@ -502,19 +1103,19 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <div class="side-group">
     <p class="side-label">开始</p>
     <a href="#top">概览</a>
-    <a href="#why">为什么需要</a>
-    <a href="#install">安装接入</a>
+    <a href="#why">为什么需要它</a>
+    <a href="#install">接入业务仓库</a>
   </div>
   <div class="side-group">
     <p class="side-label">工作方式</p>
     <a href="#lifecycle">一次请求</a>
-    <a href="#concepts">核心概念</a>
-    <a href="#routing">路由表</a>
+    <a href="#concepts">六个核心概念</a>
+    <a href="#routing">请求怎么路由</a>
     <a href="#skills">Skill 清单</a>
   </div>
   <div class="side-group">
     <p class="side-label">技术拆解</p>
-    <a href="#architecture">架构</a>
+    <a href="#architecture">三层结构</a>
     <a href="#context">上下文装载</a>
     <a href="#release">更新分发</a>
     <a href="#tradeoffs">设计取舍</a>
@@ -524,7 +1125,7 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
     <a href="#cli">命令</a>
     <a href="#matrix">支持矩阵</a>
     <a href="#evals">评测</a>
-    <a href="#troubleshooting">故障排查</a>
+    <a href="#troubleshooting">出问题时</a>
   </div>
   <div class="side-group">
     <p class="side-label">参与</p>
@@ -537,16 +1138,14 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
 
 <section class="hero" id="overview">
   <div class="badges">
-    <span class="pill ok">v0.2.7</span>
+    <span class="pill ok" data-version>v0.2.8</span>
     <span class="pill">Node ≥ 18</span>
     <span class="pill">零运行时依赖</span>
     <span class="pill">10 个 Skill</span>
   </div>
   <h1>让 AI 按同一套流程<br>改<em>代码</em></h1>
   <p class="lede">
-    WeFi-harness 是 WeFi 团队的 AI 开发流程。它让 Claude Code、Codex 和 Cursor
-    按同一套步骤改代码：先理解需求，按风险选择流程，改完用门禁和浏览器验证，
-    最后提交、开 PR、回写 issue。
+    让 Claude Code、Codex、Cursor 按团队的流程改代码，只读当前任务需要的内容。
   </p>
   <div class="install">
     <div class="install-head"><span>业务仓库根目录</span><span>bash</span></div>
@@ -567,38 +1166,55 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
 
 <section id="why">
   <p class="kicker">01 · 为什么需要</p>
-  <h2>AI 改代码的三个失败模式</h2>
+  <h2>AI 改代码，最容易翻车的地方</h2>
   <p class="lede">
-    直接把需求交给 AI，它并不缺写代码的能力，缺的是「这次该做到哪一步」的判断。
-    WeFi-harness 把这个判断写进流程，不靠 AI 每次临场发挥。
+    AI 改代码出错，常常不是因为能力不够，而是上下文不对：读得太多，抓不住重点；
+    读得太少，又会漏掉团队的约定。WeFi 先判断这次要做什么，再只加载这个任务需要的流程、规则和业务知识。
   </p>
 
-  <div class="grid c3">
-    <div class="card">
-      <span class="tag">失败模式 A</span>
-      <h4>改到不该改的地方</h4>
-      <p>加一个按钮，顺手重构了半个模块。或者该写方案的大改动，直接上手改了。</p>
-      <div class="foot">对策：两档轨道 + 300 行审查阈值</div>
-    </div>
-    <div class="card">
-      <span class="tag">失败模式 B</span>
-      <h4>改完不验证就说好了</h4>
-      <p>「已完成」只是措辞。类型没过、测试没跑、页面根本没打开过。</p>
-      <div class="foot">对策：门禁 + 浏览器验证存证</div>
-    </div>
-    <div class="card">
-      <span class="tag">失败模式 C</span>
-      <h4>文档写完就烂尾</h4>
-      <p>方案写了一半，评审记录没留，接手的人不知道当初为什么这么定。</p>
-      <div class="foot">对策：变更目录 + 教训台账</div>
-    </div>
-  </div>
+  <h3><span class="idx">1.1</span>核心特性</h3>
+  <ul class="feats">
+    <li>
+      <h3>路由选 Skill，不全局加载</h3>
+      <div>
+        <p>每次会话只注入一张简短的路由卡。AI 按你的话判断这是哪类工作，例如加功能、修缺陷、看代码、审 PR，然后只加载对应的那个 Skill。其他 Skill 的内容不进入上下文。</p>
+      </div>
+    </li>
+    <li>
+      <h3>流程逐层展开</h3>
+      <div>
+        <p>Skill 只写主干步骤，细节放在参考文件中，走到哪一步才读哪一份。参考文件离 Skill 最多两层引用，由构建检查保证。例如加一个小功能，改代码前必读约 1.3 万字；走方案流程约 2 万字。</p>
+      </div>
+    </li>
+    <li>
+      <h3>按任务拼装上下文</h3>
+      <div>
+        <ul>
+          <li><strong>规则按文件匹配</strong>：要改哪些文件，就只加载匹配这些文件路径和技术栈的规则。改 <code>.tsx</code> 时加载 React 规则，改样式时不加载接口规则。</li>
+          <li><strong>项目知识按条件读</strong>：每份知识写明「什么时候读」，条件成立才读。</li>
+          <li><strong>业务知识先搜后读</strong>：从需求中取出专有名词，在 FSD 和接口文档中搜索，只读命中的章节，不读整份索引。大小写、驼峰和缩写写法不同，都能搜到。</li>
+        </ul>
+      </div>
+    </li>
+    <li>
+      <h3>两档轨道</h3>
+      <div>
+        <p>小改直接做；涉及接口契约、全局架构或 3 个以上业务模块时，先写方案，评审通过后再开发。线上故障走 hotfix。</p>
+      </div>
+    </li>
+    <li>
+      <h3>门禁兜底</h3>
+      <div>
+        <p>每次改动都运行项目真实的类型检查、Lint、测试和构建命令，并按改动大小自动选择检查范围。</p>
+      </div>
+    </li>
+  </ul>
 
   <div class="callout">
-    <p class="title">不替代现有工具</p>
+    <p class="title">它不替代你已有的工具</p>
     <p>
-      WeFi-harness 不做代码生成，也不做 CI。它是一层流程：决定 AI 该读什么、
-      做到哪一步停下、改完拿什么证明。门禁调用的仍是项目自己的 <code>npm run build</code>、
+      它不生成代码，也不做 CI。只管三件事：AI 该读什么、做到哪一步得停下、
+      改完拿什么证明。门禁跑的还是你自己项目里的 <code>npm run build</code>、
       <code>tsc</code>、<code>eslint</code>。
     </p>
   </div>
@@ -608,27 +1224,27 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">02 · 安装接入</p>
   <h2>接入一个业务仓库</h2>
   <p class="lede">
-    接入由一个人做一次。之后每个开发者 clone 仓库，在工具里打开就能用。
-    框架每天自动更新到最新发布版本。
+    一个人做一次就够了。之后大家 clone 仓库、在工具里打开，直接能用。
+    框架每天自己更新到最新的发布版本。
   </p>
 
   <div class="grid c3">
     <div class="card">
-      <span class="tag">路径 A</span>
-      <h4>新接入</h4>
-      <p>在业务仓库根目录运行 <code>onboard</code>，克隆框架、生成引导脚本和入口。</p>
+      <span class="tag">第一次接入</span>
+      <h3>新接入</h3>
+      <p>在仓库根目录跑 <code>onboard</code>，它会克隆框架、生成引导脚本和入口。</p>
       <div class="foot">npx … onboard</div>
     </div>
     <div class="card">
-      <span class="tag">路径 B</span>
-      <h4>0.2 以前接入</h4>
-      <p>已经提交了 <code>.wefi/harness/</code> 副本、有 <code>wefi-sync.yml</code> 的仓库，运行一次 <code>migrate</code>。</p>
+      <span class="tag">老仓库</span>
+      <h3>0.2 以前接入</h3>
+      <p>仓库里已经提交了 <code>.wefi/harness/</code> 副本，还带 <code>wefi-sync.yml</code>。跑一次 <code>migrate</code>。</p>
       <div class="foot">npx … migrate</div>
     </div>
     <div class="card">
-      <span class="tag">路径 C</span>
-      <h4>模板仓库</h4>
-      <p>从团队模板仓库创建的新项目，模板中已经包含这些文件，不用再接入。</p>
+      <span class="tag">新项目</span>
+      <h3>模板仓库</h3>
+      <p>从团队模板建的项目，模板里已经带了这些文件，什么都不用做。</p>
       <div class="foot">无需命令</div>
     </div>
   </div>
@@ -637,22 +1253,34 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <pre><span class="c"># 在业务仓库根目录</span>
 <span class="k">npx</span> github:WeFi-Harness/WeFi-harness onboard</pre>
   <p>
-    它把框架仓库克隆到 <code>.wefi/harness/</code>，检出最新的发布版本，并加入 <code>.gitignore</code>。
-    同时生成引导脚本 <code>.wefi/bootstrap.mjs</code>、各工具的入口和项目知识库初稿。
+    框架会克隆到 <code>.wefi/harness/</code>，检出最新的发布版本，并加进 <code>.gitignore</code>。
+    同时生成引导脚本 <code>.wefi/bootstrap.mjs</code>、各工具的入口，还有一份项目知识库初稿。
   </p>
   <p>
-    然后在任一工具中打开仓库，输入「接入 WeFi」。AI 读代码补全项目规则、模块说明和验证手册，
-    并选择项目管理系统。最后审查改动、提交、开 PR。
+    接着在任一工具里打开仓库，说一句「接入 WeFi」。AI 会读代码，把项目规则、模块说明、
+    验证手册补全，顺便问你用哪个项目管理系统。你审一遍改动，提交，开 PR。
   </p>
+  <div class="callout">
+    <p class="title">两处会动到你仓库的文件</p>
+    <p>
+      <code>.wefi/harness/</code> 加进了 <code>.gitignore</code>，不提交。原因：它每天自己更新，
+      提交了就会跟远端打架，而且每个人本地都有完整的一份。
+    </p>
+    <p>
+      <code>AGENTS.md</code> 里会多一段带 <code>&lt;!-- wefi:start --&gt;</code> 标记的内容。
+      Codex 和 Cursor 没有 SessionStart Hook，路由卡只能写在这个文件里才读得到。
+      这段是 <code>sync</code> 生成的，别手改；手改了下次 <code>sync</code> 会盖掉。
+    </p>
+  </div>
 
   <h3><span class="idx">2.2</span>每个开发者</h3>
   <ul>
-    <li><strong>Claude Code</strong>：打开仓库时，Hook 自动克隆框架。</li>
-    <li><strong>Codex、Cursor</strong>：先运行一次 <code>node .wefi/bootstrap.mjs</code>。</li>
+    <li><strong>Claude Code</strong>：打开仓库时 Hook 自动克隆框架，什么都不用做。</li>
+    <li><strong>Codex、Cursor</strong>：先跑一次 <code>node .wefi/bootstrap.mjs</code>。</li>
   </ul>
   <p>
-    之后每天第一次使用时，框架自动更新到最新的发布版本。AI 会在回复中告诉你更新到了哪个版本。
-    想马上更新，输入 <code>/wefi update</code>，Codex 中是 <code>$wefi update</code>。
+    之后每天第一次用，框架自己更新到最新版本，AI 会在回复里说一句「已更新到 x.y.z」。
+    不想等，就输入 <code>/wefi update</code>（Codex 里是 <code>$wefi update</code>）。
   </p>
 
   <h3><span class="idx">2.3</span>按需安装</h3>
@@ -667,9 +1295,10 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
     </table>
   </div>
   <p>
-    然后运行 <code>node .wefi/harness/wefi.mjs doctor</code>，确认工具已就绪。
-    确认 WeFi 生效：在工具中输入「讲讲 <code>src/</code> 是做什么的」。Claude Code 中看到它调用
-    <code>wefi-explain</code>；Codex 和 Cursor 中看到回复开头是 <code>[wefi] 模式=explain</code>。
+    装完跑一次 <code>node .wefi/harness/wefi.mjs doctor</code>，它会告诉你还缺什么。
+    想确认 WeFi 真的生效了，在工具里问「讲讲 <code>src/</code> 是做什么的」——
+    Claude Code 会调用 <code>wefi-explain</code>；Codex 和 Cursor 的回复开头会有一行
+    <code>[wefi] 模式=explain</code>。
   </p>
 </section>
 
@@ -677,9 +1306,20 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">03 · 工作方式</p>
   <h2>一次请求走完的步骤</h2>
   <p class="lede">
-    以 issue PDB-901 为例：把文件模板页空列表的文案改成
+    拿 issue PDB-901 举例：文件模板页的空列表文案要改成
     <code>No file templates yet. Upload one to get started.</code>
   </p>
+
+<button class="wf-trigger" type="button" data-wf-open aria-haspopup="dialog">
+  <span class="wf-trigger-ico" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+  </span>
+  <span>
+    <b>看完整流程图</b>
+    <span>一张图看清：从你说话，到 PR 合并，中间经过哪几段</span>
+  </span>
+  <span class="wf-trigger-hint">点击展开</span>
+</button>
 
   <div class="term">
     <div class="term-bar"><i></i><i></i><i></i><span>你与 AI 的对话</span></div>
@@ -703,52 +1343,53 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <ol class="timeline">
     <li class="key">
       <div class="tl-head"><span class="tl-title">理解请求</span><span class="tl-tag">wefi-feature</span></div>
-      <p class="tl-body">读 issue，写快照，确认要改什么、不碰什么。</p>
+      <p class="tl-body">读 issue，写快照。要改什么、不碰什么，先定下来。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">选轨道</span><span class="tl-tag">quick / plan / hotfix</span></div>
-      <p class="tl-body">单页文案改动，不触及接口，走 quick，直接改代码。</p>
+      <p class="tl-body">单页文案，不碰接口，走 quick，直接改。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">装载规则</span><span class="tl-tag">wefi rules</span></div>
-      <p class="tl-body">按要改的文件挑出适用规则，只读这部分。</p>
+      <p class="tl-body">按要改的文件挑规则，只读挑中的。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">改代码</span><span class="tl-tag">quick</span></div>
-      <p class="tl-body">一个文件，一行文案。</p>
+      <p class="tl-body">一个文件，一行文案，就这样。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">门禁</span><span class="tl-tag">wefi gate</span></div>
-      <p class="tl-body">类型检查、Lint、相关测试。按改动自动选择检查范围。</p>
+      <p class="tl-body">类型检查、Lint、相关测试。范围按改动自动定。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">浏览器验证</span><span class="tl-tag">运行验证</span></div>
-      <p class="tl-body">打开受影响的页面，走一遍场景，截图存证。</p>
+      <p class="tl-body">打开受影响的页面，走一遍场景，截图留着。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">审查</span><span class="tl-tag">子 Agent</span></div>
-      <p class="tl-body">quick 轨道在 diff 超过 300 行或改到共享路径时才派。</p>
+      <p class="tl-body">quick 轨道只在 diff 超 300 行、或动了共享路径时才派。</p>
     </li>
     <li>
       <div class="tl-head"><span class="tl-title">交付</span><span class="tl-tag">wefi-ship</span></div>
-      <p class="tl-body">提交、push、开 PR，回写 issue 状态。</p>
+      <p class="tl-body">提交、push、开 PR，把 issue 状态也改了。</p>
     </li>
   </ol>
 
   <div class="callout">
-    <p class="title">什么时候走 plan 轨道</p>
+    <p class="title">什么时候该走 plan</p>
     <p>
-      触及接口契约、改动全局架构、跨 3 个以上业务模块时，先写方案。方案经过评审、确认接口契约后，
-      再分阶段开发，每个阶段结束时派子 Agent 评审。你也可以直接说「走方案」或「直接改」。
+      碰到接口契约、动全局架构、跨 3 个以上业务模块，就得先写方案。方案评审完、接口对齐了，
+      再分阶段开发，每段做完派子 Agent 看一遍。你也可以直接说「走方案」或「直接改」，
+      不用自己判断。
     </p>
   </div>
 </section>
 
 <section id="concepts">
   <p class="kicker">04 · 核心概念</p>
-  <h2>六个词就够了</h2>
+  <h2>记住六个词</h2>
   <p class="lede">
-    WeFi-harness 的规则文件很多，但需要记住的只有六个概念。其余都是它们的具体化。
+    规则文件不少，但真正要记的就这六个。剩下的都是它们摊开之后的细节。
   </p>
 
   <dl class="defs">
@@ -782,9 +1423,23 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">05 · 工作方式</p>
   <h2>你说一句话，它选哪条流程</h2>
   <p class="lede">
-    路由是 WeFi-harness 最核心的部分。它不靠 AI 猜，而是由 Skill 的 <code>description</code>、
-    <code>hooks/router-card.md</code> 和 <code>references/routing.md</code> 三处共同决定。
-    你也可以用 <code>/wefi</code> 直接指定。
+    路由分三层，一层兜不住有下一层。你随时可以用 <code>/wefi</code> 直接指定，
+    不用管它怎么判。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>层</th><th>谁在判</th><th>看什么</th><th>管不住的情况</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Claude Code、Codex 自己</td><td>10 个 Skill 的 <code>description</code></td><td>语义相近时选错，比如「评审 PR」和「提 PR」</td></tr>
+        <tr><td>2</td><td>模型读一张表</td><td><code>router-card.md</code>：请求 → Skill</td><td>表里没写的问法</td></tr>
+        <tr><td>3</td><td>Skill 第 0 步自己判</td><td><code>routing.md</code>：信号 → 模式，还能跑命令确认</td><td>信号本身模糊</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="arch-caption">
+    第 1 层是宿主原生的语义匹配，第 2 层是显式映射，第 3 层兜底。第 3 层能做前两层做不到的事，
+    比如分不清 <code>#12</code> 是 PR 还是 issue 时跑一次 <code>gh pr view</code>。
   </p>
 
   <div class="table-wrap">
@@ -824,8 +1479,8 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">06 · 工作方式</p>
   <h2>十个 Skill，一条流水线</h2>
   <p class="lede">
-    Skill 是 AI 的入口：每个 <code>SKILL.md</code> 说明什么时候用它、按什么步骤做。
-    它们各管一段，按阶段串起来就是完整的开发流程。
+    Skill 是 AI 的入口。每个 <code>SKILL.md</code> 就两件事：什么时候用它，用的时候按什么步骤走。
+    各管一段，接起来就是完整的开发流程。
   </p>
 
   <div class="table-wrap">
@@ -847,9 +1502,21 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   </div>
 
   <p>
-    <code>SKILL.md</code> 本身很短，10 个合计 469 行。具体步骤写在各自的 <code>references/</code> 里，
-    由 Skill 按需引用。这样路由卡保持轻量，流程细节不占上下文。
+    <code>SKILL.md</code> 本身很短，10 个加起来 469 行。具体步骤放在各自的 <code>references/</code> 里，
+    Skill 用到才读。这样常驻上下文的只有路由卡，流程细节不占地方。
   </p>
+
+  <div class="callout">
+    <p class="title">回执：AI 开工前先说一句它怎么判断的</p>
+    <p>在 Codex 和 Cursor 里，AI 读完 Skill 后的第一段话固定是这个格式，说完才动手：</p>
+    <pre><span class="c"># 不用等确认，说完就继续</span>
+<span class="d">[wefi]</span> 模式=feature 轨道=quick · 原因：单页文案改动，不触及接口
+      · 下一步：读入口规范 · 改用：/wefi bugfix quick</pre>
+    <p>
+      判断错了你当场就能纠正。Claude Code 不输出回执，直接开工；你自己用
+      <code>/wefi feature quick</code> 指定时也不输出，因为不会错。
+    </p>
+  </div>
 </section>
 
 <section id="architecture">
@@ -896,7 +1563,7 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
         <line x1="440" y1="320" x2="440" y2="338" stroke="currentColor" stroke-opacity=".22" marker-end="url(#ar)"/>
         <rect x="60" y="342" width="760" height="32" rx="7" fill="none" stroke="currentColor" stroke-opacity=".18"/>
         <text x="76" y="363" font-size="11.5" font-weight="600">数据层</text>
-        <text x="152" y="363" font-size="11" fill-opacity=".6">wefi.mjs（CLI，2627 行）· references/rules/（7 个规则文件）· .wefi/（项目知识库）</text>
+        <text x="152" y="363" font-size="11" fill-opacity=".6">wefi.mjs（CLI，2672 行）· references/rules/（7 个规则文件）· .wefi/（项目知识库）</text>
       </g>
     </svg>
   </div>
@@ -909,26 +1576,26 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">08 · 技术拆解</p>
   <h2>上下文装载：按需，且不重复</h2>
   <p class="lede">
-    Agent 框架最常见的浪费，是把所有文档一次塞给模型。WeFi-harness 的做法相反：
-    <strong>流程文件写明在哪一步读什么，没写就不读</strong>。
+    很多 Agent 框架会把文档一股脑塞给模型。这里反过来：
+    <strong>流程文件写明哪一步读什么，没写就不读</strong>。
   </p>
 
   <div class="grid c3">
     <div class="card">
       <span class="tag">动作 1</span>
-      <h4>装规则</h4>
+      <h3>装规则</h3>
       <p>改代码或审查代码之前执行。运行 <code>wefi rules &lt;要改的文件&gt;</code>，读输出中列出的规则文件。</p>
       <div class="foot">已读过的，本任务不再读</div>
     </div>
     <div class="card">
       <span class="tag">动作 2</span>
-      <h4>装知识</h4>
+      <h3>装知识</h3>
       <p>读知识表 <code>.wefi/knowledge/README.md</code>，只读「什么时候读」条件成立的文件。</p>
       <div class="foot">条件都不成立时不读</div>
     </div>
     <div class="card">
       <span class="tag">动作 3</span>
-      <h4>装业务知识</h4>
+      <h3>装业务知识</h3>
       <p>先搜再看索引。用 <code>wefi domain search</code> 按需求里的页面名、字段名定位章节。</p>
       <div class="foot">搜不到时才看总入口</div>
     </div>
@@ -936,12 +1603,13 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
 
   <h3><span class="idx">8.1</span>为什么先搜再读</h3>
   <p>
-    一次需求评估曾在索引上花了约 <strong>3.5 万字符</strong>，占读业务知识的一半，而核心章节是靠搜索找到的。
-    所以流程改成：先用需求里的专有名词搜，列出的文件少时直接读；搜不到时才看总入口和章节索引。
+    有一次需求评估，光读索引就烧掉 <strong>3.5 万字符</strong>，占整个读业务知识的一半，
+    结果真正有用的章节还是搜出来的。所以流程改了：先拿需求里的专有名词搜，列出的文件少就直接读，
+    搜不到才回去看总入口。
   </p>
   <p>
-    这条规则写在 <code>references/context-loading.md</code>。它不是建议，是必须遵守的约束：
-    多装的内容会挤掉当前任务需要的信息。
+    这条写在 <code>references/context-loading.md</code>，不是建议，是硬约束。多读进来的东西
+    会把当前任务真正需要的挤出去。
   </p>
 
   <h3><span class="idx">8.2</span>规则和知识为什么分开放</h3>
@@ -962,8 +1630,8 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">09 · 技术拆解</p>
   <h2>更新分发：一个 tag 服务所有人</h2>
   <p class="lede">
-    框架同时服务多个团队，但业务仓库里不提交它的副本。每个人本地有一个 clone，
-    每天第一次使用时自动切到最新 tag。
+    一套框架服务多个团队，但业务仓库里不提交它的副本。每个人本地有个 clone，
+    每天第一次用时自己切到最新的 tag。
   </p>
 
   <div class="term">
@@ -974,75 +1642,77 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
       <span class="ln o">&nbsp;&nbsp;├─ 构建并测试</span>
       <span class="ln o">&nbsp;&nbsp;├─ 提交版本号</span>
       <span class="ln o">&nbsp;&nbsp;├─ 在后面做一个只含运行文件的提交</span>
-      <span class="ln o">&nbsp;&nbsp;└─ 打 tag v0.2.8，推送</span>
+      <span class="ln o">&nbsp;&nbsp;└─ 打 tag <span data-version>v0.2.8</span>，推送</span>
       <span class="ln dim"># 每个开发者，第二天第一次使用</span>
       <span class="ln o">SessionStart Hook，或 wefi status</span>
       <span class="ln o">&nbsp;&nbsp;├─ git fetch</span>
       <span class="ln o">&nbsp;&nbsp;├─ 切到最新的 tag</span>
-      <span class="ln o">&nbsp;&nbsp;└─ AI 在回复中说一行「WeFi 已更新到 0.2.8：…」</span>
+      <span class="ln o">&nbsp;&nbsp;└─ AI 在回复中说一行「WeFi 已更新到 <span data-version>0.2.8</span>：…」</span>
     </div>
   </div>
 
   <h3><span class="idx">9.1</span>不更新的情况</h3>
   <ul>
-    <li>clone 中有未提交的改动。</li>
-    <li>clone 在贡献分支上。</li>
-    <li>环境变量 <code>WEFI_HARNESS_NO_UPDATE=1</code>。</li>
+    <li>clone 里有没提交的改动。</li>
+    <li>clone 停在贡献分支上。</li>
+    <li>设了 <code>WEFI_HARNESS_NO_UPDATE=1</code>。</li>
   </ul>
 
   <h3><span class="idx">9.2</span>为什么 tag 只含运行文件</h3>
   <p>
-    开发用的 <code>bin/</code>、<code>scripts/</code>、<code>test/</code>、<code>evals/</code> 不在发布 tag 中。
-    所以业务仓库里的 <code>.wefi/harness/</code> 是干净的。需要完整源码时，<code>wefi contribute</code>
-    从 <code>main</code> 开分支。
+    <code>bin/</code>、<code>scripts/</code>、<code>test/</code>、<code>evals/</code> 是开发用的，
+    不进发布 tag。业务仓库里的 <code>.wefi/harness/</code> 因此是干净的。要改框架时，
+    <code>wefi contribute</code> 会从 <code>main</code> 开分支，拿到完整源码。
   </p>
   <p>
-    这带来一个结果：<strong>合入 main 的改动不会立刻影响任何人</strong>。发版后才到达所有人。
-    维护人可以合并多个 PR 再一起发。
+    副作用是：<strong>合进 main 的改动不会立刻影响任何人</strong>，发版了才到大家手上。
+    维护人可以攒几个 PR 一起发。
   </p>
 </section>
 
 <section id="tradeoffs">
   <p class="kicker">10 · 技术拆解</p>
   <h2>设计取舍</h2>
-  <p class="lede">下面五条是刻意的取舍。写出来，是为了让想改它的人知道代价在哪。</p>
+  <p class="lede">这五条是刻意选的。写下来，是想改的人能知道代价在哪。</p>
 
   <h3><span class="idx">10.1</span>为什么是两档轨道，不是三档</h3>
   <p>
-    早期设计用 S/M/L 三档。实际使用后收敛成 quick 和 plan 两档，hotfix 作为 bugfix 的一种。
-    原因：<strong>档位越多，AI 和人都要多判断一次</strong>。两档的边界足够清楚：
-    改一个文件就是 quick，触及接口就是 plan。
+    早期是 S/M/L 三档，用下来收敛成 quick 和 plan，hotfix 归到 bugfix 里。
+    <strong>档位每多一档，AI 和人就要多判断一次</strong>。两档的边界够清楚：
+    动一个文件是 quick，碰接口是 plan。
   </p>
 
   <h3><span class="idx">10.2</span>为什么审查阈值是 300 行或共享路径</h3>
   <p>
-    审查要花真实的时间和 token。小改动派审查，成本高于收益；不设阈值，大改动就会裸奔。
-    300 行是经验值，写在 <code>.wefi/config.yaml</code> 的 <code>review.max_lines</code>，项目可以调。
+    审查要花真金白银的时间和 token。小改动也派审查，成本比收益高；完全不设阈值，
+    大改动就裸奔了。300 行是试出来的经验值，写在 <code>.wefi/config.yaml</code> 的
+    <code>review.max_lines</code>，项目可以自己调。
   </p>
 
   <h3><span class="idx">10.3</span>为什么规则按文件匹配，不按目录</h3>
   <p>
-    前端的 <code>*.tsx</code> 和 <code>*.css</code> 适用的规则不同。按目录匹配会让读到的规则变多，
-    按 glob 匹配可以让只改样式的人不读到 TypeScript 规则。
+    前端的 <code>*.tsx</code> 和 <code>*.css</code> 适用的规则不一样。按目录匹配会读进来一堆没用的，
+    按 glob 匹配能让只改样式的人不看到 TypeScript 规则。
   </p>
   <p>
-    规则文件的 frontmatter 写 <code>paths</code>，<code>[]</code> 表示全局。项目规则用同名文件覆盖团队规则。
+    规则文件的 frontmatter 里写 <code>paths</code>，留空 <code>[]</code> 就是全局生效。
+    项目规则和团队规则同名时，项目的那份生效。
   </p>
 
   <h3><span class="idx">10.4</span>为什么不做自己的 CI</h3>
   <p>
-    门禁调用的是项目自己的 <code>typecheck</code>、<code>lint</code>、<code>test</code>、<code>build</code> 命令。
-    WeFi-harness 不替代 CI。它增加的是<strong>在提交之前</strong>跑到同样的检查，并把结果写进汇报。
+    门禁跑的是项目自己的 <code>typecheck</code>、<code>lint</code>、<code>test</code>、<code>build</code>。
+    这里不替代 CI，加的是<strong>提交之前</strong>先跑一遍同样的检查，再把结果写进汇报。
   </p>
   <p>
-    调宽检测是 WeFi 自己加的：列出新增的 <code>any</code>、<code>@ts-ignore</code>、
-    <code>eslint-disable</code>、跳过的测试。
+    调宽检测是 WeFi 自己加的一项：新写了 <code>any</code>、<code>@ts-ignore</code>、
+    <code>eslint-disable</code>，或者跳过了测试，都会列出来。
   </p>
 
   <h3><span class="idx">10.5</span>为什么审查交给子 Agent</h3>
   <p>
-    写代码的上下文不能自己批准自己。子 Agent 不继承当前对话，只拿到 diff 和审查清单，
-    所以它看不到写代码时的「我是这么想的」，只能看代码本身。
+    写代码的那个上下文不能自己批准自己。子 Agent 不继承当前对话，只拿到 diff 和审查清单，
+    看不到写代码的人当时「我是这么想的」，只能对着代码本身判。
   </p>
 </section>
 
@@ -1087,10 +1757,10 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
     <table>
       <thead><tr><th>工具</th><th>状态</th><th>说明</th></tr></thead>
       <tbody>
-        <tr><td>Claude Code</td><td>支持</td><td>会话开始时由项目 Hook 注入路由卡</td></tr>
-        <tr><td>Codex</td><td>支持</td><td><code>AGENTS.md</code> 的 WeFi 节提供路由卡</td></tr>
-        <tr><td>Cursor</td><td>实验性</td><td><code>sync</code> 生成 <code>.cursor/skills/</code> 入口</td></tr>
-        <tr><td>Windows</td><td>支持</td><td>git 默认不检出符号链接，引导脚本把占位文件换成本地目录联接</td></tr>
+        <tr><td>Claude Code</td><td><span class="st ok">支持</span></td><td>会话开始时由项目 Hook 注入路由卡</td></tr>
+        <tr><td>Codex</td><td><span class="st ok">支持</span></td><td><code>AGENTS.md</code> 的 WeFi 节提供路由卡</td></tr>
+        <tr><td>Cursor</td><td><span class="st exp">实验性</span></td><td><code>sync</code> 生成 <code>.cursor/skills/</code> 入口</td></tr>
+        <tr><td>Windows</td><td><span class="st ok">支持</span></td><td>git 默认不检出符号链接，引导脚本把占位文件换成本地目录联接</td></tr>
       </tbody>
     </table>
   </div>
@@ -1119,40 +1789,42 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">13 · 参考</p>
   <h2>评测：在真实会话里跑</h2>
   <p class="lede">
-    流程写得对不对，不能靠读文档判断。WeFi-harness 的评测用无头模式运行真实的 Claude Code 和 Codex，
-    在业务仓库副本上执行请求，再按断言判定。
+    流程写得对不对，读文档看不出来。评测直接用无头模式跑真实的 Claude Code 和 Codex，
+    在业务仓库副本上发请求，再按断言判。
   </p>
 
   <div class="grid c3">
     <div class="card">
       <span class="tag">步骤 1</span>
-      <h4>准备夹具</h4>
+      <h3>准备夹具</h3>
       <p>复制业务仓库，删除 git 远端，运行 <code>sync</code>，提交。</p>
       <div class="foot">只读，每次运行复制新的</div>
     </div>
     <div class="card">
       <span class="tag">步骤 2</span>
-      <h4>运行场景</h4>
+      <h3>运行场景</h3>
       <p><code>evals/run.mjs</code> 发出请求，记录读过的文件、运行的命令、改动和 diff。</p>
       <div class="foot">支持 --only、--tools、--repeat、--jobs</div>
     </div>
     <div class="card">
       <span class="tag">步骤 3</span>
-      <h4>有无对比</h4>
+      <h3>有无对比</h3>
       <p>同一请求在有 WeFi 和没有 WeFi 的夹具上各跑一次，按 base 场景的断言判定验收。</p>
       <div class="foot">现有对照：小改动、接口变更、缺陷修复</div>
     </div>
   </div>
 
   <p>
-    发版前必须运行路由评测。改了某个 Skill 的流程时，必须运行该 Skill 的端到端评测。
+    断言能查的东西比想象中多：加载了哪个 Skill、读了哪些文件、跑了哪些命令、
+    diff 里有没有某段文字、改动的文件路径对不对、worktree 的分支对不对。
+    发版前必须跑路由评测；改了某个 Skill 的流程，还得跑那个 Skill 的端到端评测。
   </p>
 </section>
 
 <section id="troubleshooting">
   <p class="kicker">14 · 参考</p>
   <h2>出问题时</h2>
-  <p class="lede">大部分问题落在下面几类。每条都写明做法，不用猜。</p>
+  <p class="lede">常见问题就这几类，每条都写了怎么做。</p>
 
   <div class="table-wrap">
     <table>
@@ -1176,20 +1848,20 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <p class="kicker">15 · 参与</p>
   <h2>贡献</h2>
   <p class="lede">
-    所有改动都走 PR。合入 main 不会发版。维护人发版后，每个开发者业务仓库中的
-    <code>.wefi/harness/</code> clone 在当天第一次使用时自动切到新版本。
+    改动都走 PR，合进 main 不算发版。维护人发版之后，每个人仓库里的
+    <code>.wefi/harness/</code> clone 会在当天第一次用时自己切过去。
   </p>
 
   <div class="grid c2">
     <div class="card">
       <span class="tag">路径 A · 推荐</span>
-      <h4>在业务仓库中贡献</h4>
+      <h3>在业务仓库中贡献</h3>
       <p><code>.wefi/harness/</code> 就是本仓库的 clone。发现问题时不用另外克隆。</p>
       <div class="foot">wefi contribute start → 修改 → finish</div>
     </div>
     <div class="card">
       <span class="tag">路径 B</span>
-      <h4>直接改本仓库</h4>
+      <h3>直接改本仓库</h3>
       <p>克隆 <code>WeFi-Harness/WeFi-harness</code>，建分支，改完开 PR。</p>
       <div class="foot">需要仓库的写权限</div>
     </div>
@@ -1224,9 +1896,10 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
 <section id="roadmap">
   <p class="kicker">16 · 参与</p>
   <h2>路线图与现状</h2>
-  <p class="lede">当前版本 v0.2.7。以下是从更新日志挑出的关键节点。</p>
+  <p class="lede">当前版本 <span data-version>v0.2.8</span>。下面是从更新日志里挑的几个关键节点。</p>
 
   <ul class="versions">
+    <li><span class="vnum" data-unreleased>未发布</span><span class="vbody"><strong>方案带出处</strong> — 写方案时，关键结论写出处；评审打开出处核对，设计建立在错误现状上的方案不能通过。</span></li>
     <li><span class="vnum">v0.2.7</span><span class="vbody"><strong>业务知识</strong> — 几个仓库共用一份从 FSD 生成的知识，需求评估和写方案时必读。</span></li>
     <li><span class="vnum">v0.2.3</span><span class="vbody"><strong>需求评估</strong> — 问「能开工吗」时给出结论和最多 5 条待确认，写进变更目录。</span></li>
     <li><span class="vnum">v0.2.1</span><span class="vbody"><strong>精简发布</strong> — 发布 tag 只含运行文件，团队规则移到 <code>references/rules</code>。</span></li>
@@ -1238,18 +1911,267 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   <div class="grid c2">
     <div class="card">
       <span class="tag">现在</span>
-      <h4>已支持</h4>
+      <h3>已支持</h3>
       <p>前端技术栈的档案和规则；Claude Code、Codex 完整支持；Cursor 实验性；Windows 可用。</p>
-      <div class="foot">v0.2.7</div>
+      <div class="foot" data-version>v0.2.8</div>
     </div>
     <div class="card">
       <span class="tag">尚未</span>
-      <h4>后端等其他技术栈</h4>
+      <h3>后端等其他技术栈</h3>
       <p>多技术栈的设计已经完成，档案和规则还没有落地。</p>
       <div class="foot">见 <code>docs/multi-stack-design.md</code></div>
     </div>
   </div>
 </section>
+
+<div class="wf-modal" id="wf-modal" role="dialog" aria-modal="true" aria-labelledby="wf-modal-title">
+  <div class="wf-modal-bar">
+    <h3 id="wf-modal-title">一次请求的完整流程</h3>
+    <span class="sub">从你说一句话，到 PR 和 issue 都留下记录</span>
+    <span class="spacer"></span>
+    <button class="wf-close" type="button" data-wf-close aria-label="关闭">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3L13 13M13 3L3 13"/></svg>
+    </button>
+  </div>
+  <div class="wf-modal-body">
+<div class="wf-wrap">
+<div class="workflow" role="img" aria-label="WeFi-harness 一次请求的完整流程总览：人提出请求，经路由卡选模式和轨道，分四段推进，每段交出产物">
+  <svg class="wf-defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <marker id="wf-ah" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="8.5" refY="6" orient="auto-start-reverse">
+        <path d="M3.5 2L8.5 6L3.5 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+  </svg>
+
+  <!-- 顶部：人 → 路由卡 ↔ 材料 -->
+  <div class="wf-control">
+    <div class="wf-node wf-human wf-setup">
+      <span class="wf-avatar">
+        <svg class="wf-person" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="8" cy="5" r="2.9"/>
+          <path d="M2.6 14.2c0-3 2.4-4.9 5.4-4.9s5.4 1.9 5.4 4.9z"/>
+        </svg>
+      </span>
+      <div>
+        <b>你说一句话</b>
+        <span>「做一下 PDB-901」「这页白屏了，修一下」</span>
+      </div>
+    </div>
+    <svg viewBox="0 0 48 92" aria-hidden="true">
+      <path class="wf-a" d="M8 46H40" marker-end="url(#wf-ah)"/>
+    </svg>
+    <div class="wf-node wf-agent wf-lead">
+      <div>
+        <b>路由卡</b>
+        <small>router-card.md</small>
+      </div>
+      <ol>
+        <li>读请求</li>
+        <li>判模式</li>
+        <li>判轨道</li>
+        <li>选分支</li>
+      </ol>
+    </div>
+    <svg viewBox="0 0 48 92" aria-hidden="true">
+      <path class="wf-a" d="M8 46H40" marker-end="url(#wf-ah)" marker-start="url(#wf-ah)"/>
+    </svg>
+    <div class="wf-sources">
+      <div class="wf-node wf-tool">10 个 Skill<i>按需加载</i></div>
+      <div class="wf-node wf-tool">.wefi/ 项目知识<i>按条件读</i></div>
+    </div>
+  </div>
+
+  <svg class="wf-bus" viewBox="0 0 1520 34" aria-hidden="true">
+    <path class="wf-a" d="M836 0V16M181 16H1339"/>
+    <path class="wf-a" d="M181 16V32" marker-end="url(#wf-ah)"/>
+    <path class="wf-a" d="M567 16V32" marker-end="url(#wf-ah)"/>
+    <path class="wf-a" d="M953 16V32" marker-end="url(#wf-ah)"/>
+    <path class="wf-a" d="M1339 16V32" marker-end="url(#wf-ah)"/>
+  </svg>
+
+  <div class="wf-stages">
+    <!-- 01 -->
+    <section class="wf-stage" aria-label="理解与定界">
+      <header><span>01</span><div class="wf-name">理解与定界</div></header>
+      <div class="wf-dia">
+        <svg viewBox="0 0 338 274" aria-hidden="true">
+          <path class="wf-a" d="M169 32V54M52 54H286"/>
+          <path class="wf-a" d="M52 54V72" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M169 54V72" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M286 54V72" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M52 128V148H286V128"/>
+          <path class="wf-a" d="M169 148V186" marker-end="url(#wf-ah)"/>
+        </svg>
+        <span class="wf-obj" style="left:50px;top:0;width:238px">请求原文，或 issue 编号</span>
+        <div class="wf-node wf-agent" style="left:0;top:74px;width:104px;height:54px">
+          <b>装规则</b><span>按文件挑</span>
+        </div>
+        <div class="wf-node wf-agent" style="left:117px;top:74px;width:104px;height:54px">
+          <b>装知识</b><span>按条件读</span>
+        </div>
+        <div class="wf-node wf-agent" style="left:234px;top:74px;width:104px;height:54px">
+          <b>读 issue</b><span>写快照</span>
+        </div>
+        <span class="wf-t wf-e" style="left:178px;top:157px">只在流程要求时装</span>
+        <div class="wf-node wf-check" style="left:50px;top:188px;width:238px;height:56px">
+          <b>判断模式与轨道</b><span>Codex、Cursor 中先写一行回执</span>
+        </div>
+      </div>
+      <div class="wf-rules">
+        <span>含糊但猜错代价低：记成假设，直接做</span>
+        <span>含糊且猜错代价高：停下问，一次问完</span>
+        <span>多段材料：先查矛盾，再决定拆不拆</span>
+      </div>
+      <div class="wf-gate">
+        <b>进入下一步的条件</b>
+        <span>目标和范围能对应到代码</span>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="wf-stage" aria-label="选择轨道">
+      <header><span>02</span><div class="wf-name">选择轨道</div></header>
+      <div class="wf-dia">
+        <svg viewBox="0 0 338 274" aria-hidden="true">
+          <path class="wf-a" d="M169 32V50" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M169 108V118M82 118H256"/>
+          <path class="wf-a" d="M82 118V128" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M256 118V128" marker-end="url(#wf-ah)"/>
+          <path class="wf-a wf-d" d="M0 207H128M210 207H338"/>
+        </svg>
+        <span class="wf-obj" style="left:50px;top:0;width:238px">同一个请求</span>
+        <div class="wf-node wf-human" style="left:50px;top:52px;width:238px;height:56px">
+          <b>三个条件问一遍</b><span>接口契约 · 全局架构 · 跨 3 个模块</span>
+        </div>
+        <div class="wf-node wf-agent" style="left:0;top:130px;width:164px;height:56px">
+          <b>quick</b><span>都不满足：直接改</span>
+        </div>
+        <div class="wf-node wf-agent" style="left:174px;top:130px;width:164px;height:56px">
+          <b>plan</b><span>满足一条：先写方案</span>
+        </div>
+        <span class="wf-sep" style="left:128px;top:197px;width:82px">例外</span>
+        <div class="wf-node wf-agent" style="left:0;top:218px;width:338px;height:52px">
+          <b>hotfix</b><span>线上故障：只修故障，跳过方案</span>
+        </div>
+      </div>
+      <div class="wf-rules">
+        <span>你说「直接改」或「走方案」，按你说的做</span>
+        <span>quick 中途发现触及接口：停下，转 plan</span>
+        <span>只有你能把 plan 改回 quick</span>
+      </div>
+      <div class="wf-gate">
+        <b>轨道的产出</b>
+        <span>一个分支，一条明确的路线</span>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="wf-stage" aria-label="开发与审查">
+      <header><span>03</span><div class="wf-name">开发与审查</div></header>
+      <div class="wf-dia">
+        <svg viewBox="0 0 338 274" aria-hidden="true">
+          <path class="wf-a" d="M169 32V50" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M169 108V128" marker-end="url(#wf-ah)"/>
+          <path class="wf-a wf-d" d="M279 158H296V80H283" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M169 186V206" marker-end="url(#wf-ah)"/>
+        </svg>
+        <span class="wf-obj" style="left:50px;top:0;width:238px">分支已就位</span>
+        <div class="wf-node wf-agent" style="left:59px;top:52px;width:220px;height:56px">
+          <b>改代码</b><span>遵守装过的规则</span>
+        </div>
+        <span class="wf-t wf-e" style="left:0;top:108px;width:161px;text-align:right">按条件派子 Agent</span>
+        <span class="wf-t wf-e" style="left:302px;top:99px;width:36px;text-align:center">有问题<br>就改</span>
+        <div class="wf-node wf-check" style="left:59px;top:130px;width:220px;height:56px">
+          <b>审查</b><span>独立只读，不改代码</span>
+        </div>
+        <div class="wf-node wf-agent" style="left:59px;top:208px;width:220px;height:56px">
+          <b>门禁 wefi gate</b><span>类型检查 · Lint · 测试 · 构建</span>
+        </div>
+      </div>
+      <div class="wf-rules">
+        <span>quick：diff 超 300 行，或动了共享路径才派审查</span>
+        <span>plan：方案评审、每个阶段结束、完成复核，各派一次</span>
+        <span>门禁失败就修，修完重跑，不带病交付</span>
+      </div>
+      <div class="wf-gate">
+        <b>本段的产出</b>
+        <span>通过门禁的提交，和一份审查结论</span>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="wf-stage" aria-label="验证与交付">
+      <header><span>04</span><div class="wf-name">验证与交付</div></header>
+      <div class="wf-dia">
+        <svg viewBox="0 0 338 274" aria-hidden="true">
+          <path class="wf-a" d="M169 32V50" marker-end="url(#wf-ah)"/>
+          <path class="wf-a" d="M169 172V194" marker-end="url(#wf-ah)"/>
+        </svg>
+        <span class="wf-obj" style="left:50px;top:0;width:238px">改动已完成</span>
+        <div class="wf-group" style="left:0;top:52px;width:338px;height:120px">
+          <b>运行验证：把应用真的跑起来</b>
+          <ul>
+            <li>启动并健康检查</li>
+            <li>登录并走到目标页</li>
+            <li>操作受影响的功能</li>
+            <li>截图存到 state/</li>
+          </ul>
+        </div>
+        <span class="wf-t wf-e" style="left:178px;top:173px">证据齐全才继续</span>
+        <div class="wf-node wf-check" style="left:50px;top:196px;width:238px;height:56px">
+          <b>交付：ship</b><span>提交 · push · 开 PR · 回写 issue</span>
+        </div>
+      </div>
+      <div class="wf-rules">
+        <span>没有浏览器 MCP：跳过，但汇报里必须写明</span>
+        <span>截图、测试输出、命令结果都是证据，不是形容词</span>
+        <span>AI 不合并 PR，合并由人决定</span>
+      </div>
+      <div class="wf-gate">
+        <b>一件事到此结束</b>
+        <span>PR 和 issue 都留下可回查的记录</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- 底部：各段产出 -->
+  <div class="wf-out" aria-label="各段交出的东西">
+    <span class="wf-out-label">各段产出</span>
+    <span class="wf-outbox"><b>目标和范围</b><span>一份理解</span></span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-outbox"><b>分支与轨道</b><span>一条路线</span></span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-outbox"><b>方案与评审</b><span>只在 plan 轨道</span></span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-pill">
+      <svg class="wf-person" viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="5" r="2.9"/>
+        <path d="M2.6 14.2c0-3 2.4-4.9 5.4-4.9s5.4 1.9 5.4 4.9z"/>
+      </svg>人确认方案</span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-outbox"><b>通过的提交</b><span>附门禁结果</span></span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-pill">
+      <svg class="wf-person" viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="5" r="2.9"/>
+        <path d="M2.6 14.2c0-3 2.4-4.9 5.4-4.9s5.4 1.9 5.4 4.9z"/>
+      </svg>人审阅 PR</span>
+    <i class="wf-arr" aria-hidden="true"></i>
+    <span class="wf-outbox"><b>PR 与 issue</b><span>可回查</span></span>
+  </div>
+
+  <div class="wf-legend" aria-label="图例">
+    <span><i class="wf-sw wf-agent"></i>AI 执行</span>
+    <span><i class="wf-sw wf-check"></i>独立复核</span>
+    <span><i class="wf-sw wf-human"></i>人的决定</span>
+    <span><i class="wf-sw wf-art"></i>阶段产出</span>
+    <span><i class="wf-sw wf-tool"></i>材料与方法</span>
+  </div>
+</div>
+  </div>
+</div>
+</div>
 
 </main>
 </div>
@@ -1285,7 +2207,13 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
     }
 
     navLinks.forEach(function (link) {
-      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      var isCurrent = link.getAttribute('href') === '#' + current;
+      link.classList.toggle('active', isCurrent);
+      if (isCurrent) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
     });
 
     var activeLink = document.querySelector('.sidebar a.active');
@@ -1311,6 +2239,60 @@ footer { padding: 28px 0 40px; border-top: 1px solid var(--line); background: va
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   setCurrent();
+})();
+
+// 流程图全屏弹窗
+(function () {
+  var modal = document.getElementById('wf-modal');
+  var openBtn = document.querySelector('[data-wf-open]');
+  var closeBtn = modal.querySelector('[data-wf-close]');
+  var body = modal.querySelector('.wf-modal-body');
+  var lastFocus = null;
+
+  function open() {
+    lastFocus = document.activeElement;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    body.scrollLeft = 0;
+    body.scrollTop = 0;
+    closeBtn.focus();
+  }
+
+  function close() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+
+  // 点在图外面（滚动容器的空白处）关闭
+  body.addEventListener('click', function (e) {
+    if (e.target === body) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+      return;
+    }
+    // Tab 循环留在弹窗内
+    if (e.key === 'Tab') {
+      var f = modal.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
 })();
 </script>
 
